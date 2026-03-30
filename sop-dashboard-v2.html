@@ -1,333 +1,916 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Zelesta — SOP Workflows</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
+/* ── TOKENS ─────────────────────────────────────────────────────────── */
 :root {
-  --bg:#0e1118; --s1:#161b27; --s2:#1c2235; --s3:#222840;
-  --b1:#2a3248; --b2:#3a4560; --b3:#4a5570;
-  --t1:#e2e8f8; --t2:#8892b0; --t3:#4a5570;
-  --acc:#5b7fff; --acc2:#7b9fff;
-  --blue:#3b7df8; --blue-bg:#142050; --blue-t:#93b8ff;
-  --amber:#e09020; --amber-bg:#3a2508; --amber-t:#fcd28a;
-  --teal:#0e9f8e; --teal-bg:#0a2e2a; --teal-t:#5ee8d4;
-  --pink:#c42070; --pink-bg:#38082a; --pink-t:#f9a8d4;
-  --green:#18a84a; --green-bg:#0b2e18; --green-t:#86efac;
-  --red:#e02020; --red-bg:#380808; --red-t:#fca5a5;
-  --gray:#4a5570; --gray-bg:#1c2235; --gray-t:#9ca3af;
+  --bg:      #070a10;
+  --s1:      #0d1117;
+  --s2:      #111620;
+  --s3:      #161c2a;
+  --b0:      #1a2133;
+  --b1:      #1e2840;
+  --b2:      #28344f;
+  --b3:      #38476a;
+  --t1:      #e8eeff;
+  --t2:      #7888aa;
+  --t3:      #3d4e6e;
+  --acc:     #4f7cff;
+  --acc-glow:#4f7cff44;
+
+  --blue:     #4a7cf8; --blue-bg: #0d1e45; --blue-t: #a8c4ff; --blue-border: #1e3a7a;
+  --amber:    #e8982a; --amber-bg:#2e1d04; --amber-t: #fcd896; --amber-border:#5a3a08;
+  --teal:     #12b09e; --teal-bg: #052920; --teal-t:  #5ee8d4; --teal-border: #0d5045;
+  --pink:     #d42680; --pink-bg: #2a0520; --pink-t:  #f9a8d4; --pink-border: #5a0a38;
+  --green:    #1ab84e; --green-bg:#052814; --green-t: #86efac; --green-border:#0a4a20;
+  --red:      #e83030; --red-bg:  #280505; --red-t:   #fca5a5; --red-border:  #5a0808;
+  --gray:     #4a5870; --gray-bg: #111620; --gray-t:  #94a3b8; --gray-border: #2a3448;
+
+  --r:     8px;
+  --r-lg:  14px;
+  --r-xl:  18px;
+  --shadow: 0 4px 24px #00000055;
+  --shadow-lg: 0 8px 48px #00000077;
+  --node-w: 200px;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);height:100vh;overflow:hidden;user-select:none}
 
-/* ── LAYOUT ── */
-.app{display:flex;height:100vh}
-.sidebar{width:210px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--b1);display:flex;flex-direction:column;z-index:10}
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.topbar{height:48px;background:var(--s1);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0}
+/* ── RESET ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Geist', sans-serif;
+  background: var(--bg);
+  color: var(--t1);
+  height: 100vh;
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
 
-/* ── SIDEBAR ── */
-.sb-logo{padding:16px 14px 12px;border-bottom:1px solid var(--b1)}
-.sb-logo-name{font-size:13px;font-weight:500;color:var(--t1)}
-.sb-logo-sub{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;margin-top:2px}
-.sb-section{padding:12px 10px 4px;font-size:9px;color:var(--t3);letter-spacing:.1em;text-transform:uppercase}
-.flow-list{flex:1;overflow-y:auto;padding:0 6px}
-.flow-item{padding:8px 8px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--t2);display:flex;align-items:center;gap:7px;margin-bottom:1px;transition:all .12s}
-.flow-item:hover{background:var(--s2);color:var(--t1)}
-.flow-item.active{background:var(--blue-bg);color:var(--blue-t)}
-.flow-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.flow-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.flow-count{font-size:9px;background:var(--s2);padding:1px 5px;border-radius:3px;color:var(--t3)}
-.btn-new{margin:6px;padding:8px 10px;background:transparent;border:1px dashed var(--b2);border-radius:7px;color:var(--t3);font-size:11px;cursor:pointer;transition:all .12s;font-family:'DM Sans',sans-serif;width:calc(100% - 12px)}
-.btn-new:hover{border-color:var(--acc);color:var(--acc2);background:var(--blue-bg)}
+/* ── LAYOUT ─────────────────────────────────────────────────────────── */
+.app { display: flex; height: 100vh; }
 
-/* ── TOPBAR ── */
-.tb-title{font-size:13px;font-weight:500;flex:1}
-.tb-meta{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace}
-.tb-btn{padding:5px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:5px;color:var(--t2);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s;white-space:nowrap}
-.tb-btn:hover{border-color:var(--b2);color:var(--t1);background:var(--s3)}
-.tb-btn.primary{background:var(--blue-bg);border-color:var(--blue);color:var(--blue-t)}
-.tb-btn.danger{background:var(--red-bg);border-color:var(--red);color:var(--red-t)}
-.tb-sep{width:1px;height:20px;background:var(--b1)}
+/* ── SIDEBAR ────────────────────────────────────────────────────────── */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--s1);
+  border-right: 1px solid var(--b0);
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+}
 
-/* ── CANVAS ── */
-.canvas-wrap{flex:1;overflow:hidden;position:relative}
-.canvas{position:absolute;transform-origin:0 0;cursor:default}
-.canvas.panning{cursor:grabbing}
-.grid-bg{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,var(--b1) 1px,transparent 1px);background-size:24px 24px;opacity:.5}
+.sidebar-brand {
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid var(--b0);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.brand-mark {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--acc) 0%, #7c5fff 100%);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #fff;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+  box-shadow: 0 0 16px var(--acc-glow);
+}
+.brand-text { font-size: 13px; font-weight: 600; color: var(--t1); letter-spacing: -0.2px; }
+.brand-sub  { font-size: 10px; color: var(--t2); margin-top: 1px; font-family: 'Geist Mono', monospace; }
 
-/* ── SVG EDGES ── */
-.edge-layer{position:absolute;top:0;left:0;overflow:visible;pointer-events:none}
-.edge-path{fill:none;stroke-width:1.8;stroke-opacity:.65;transition:stroke-opacity .15s}
-.edge-path:hover{stroke-opacity:1}
-.edge-label-bg{fill:var(--s1)}
-.edge-label-txt{font-family:'DM Mono',monospace;font-size:9px;fill:var(--t3)}
-.edge-drawing{fill:none;stroke:var(--acc);stroke-width:1.5;stroke-dasharray:5 3;pointer-events:none}
+.sidebar-section {
+  padding: 10px 10px 4px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--t3);
+}
 
-/* ── NODE ── */
-.node{position:absolute;width:196px;background:var(--s1);border:1px solid var(--b1);border-radius:10px;overflow:visible;cursor:default;transition:border-color .12s,box-shadow .12s}
-.node:hover{border-color:var(--b2)}
-.node.selected{border-color:var(--acc);box-shadow:0 0 0 2px rgba(91,127,255,.2)}
-.node-header{padding:7px 11px 6px;font-size:10px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;gap:5px;border-radius:9px 9px 0 0;cursor:grab}
-.node-header:active{cursor:grabbing}
-.node-dot{width:5px;height:5px;border-radius:50%}
-.node-body{padding:9px 11px 10px;cursor:text}
-.node-label{font-size:12px;font-weight:500;line-height:1.3;margin-bottom:3px;outline:none;min-height:1em}
-.node-desc{font-size:10px;color:var(--t2);line-height:1.55;outline:none;min-height:1em}
-.node-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
-.node-footer{border-top:1px solid var(--b1);padding:5px 11px;font-size:9px;color:var(--t3);font-family:'DM Mono',monospace;cursor:text;outline:none}
+.flow-list { flex: 1; overflow-y: auto; padding: 0 8px 8px; }
+.flow-list::-webkit-scrollbar { width: 3px; }
+.flow-list::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 10px; }
 
-/* color variants */
-.nh-blue{background:var(--blue-bg);color:var(--blue-t)}.nd-blue{background:var(--blue-t)}
-.nh-amber{background:var(--amber-bg);color:var(--amber-t)}.nd-amber{background:var(--amber-t)}
-.nh-teal{background:var(--teal-bg);color:var(--teal-t)}.nd-teal{background:var(--teal-t)}
-.nh-pink{background:var(--pink-bg);color:var(--pink-t)}.nd-pink{background:var(--pink-t)}
-.nh-green{background:var(--green-bg);color:var(--green-t)}.nd-green{background:var(--green-t)}
-.nh-red{background:var(--red-bg);color:var(--red-t)}.nd-red{background:var(--red-t)}
-.nh-gray{background:var(--gray-bg);color:var(--gray-t)}.nd-gray{background:var(--gray-t)}
+.flow-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--r);
+  cursor: pointer;
+  margin-bottom: 2px;
+  transition: background 0.15s;
+  border: 1px solid transparent;
+}
+.flow-item:hover { background: var(--s3); }
+.flow-item.active {
+  background: var(--b1);
+  border-color: var(--b2);
+}
+.flow-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+}
+.flow-name { font-size: 12px; color: var(--t1); flex: 1; font-weight: 500; }
+.flow-count {
+  font-size: 10px;
+  color: var(--t3);
+  background: var(--b1);
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-family: 'Geist Mono', monospace;
+  font-weight: 500;
+}
 
-/* PORT DOTS */
-.port{position:absolute;width:11px;height:11px;border-radius:50%;border:2px solid var(--bg);cursor:crosshair;z-index:5;transition:transform .1s}
-.port:hover{transform:scale(1.4)}
-.port-out{right:-6px}
-.port-in{left:-6px}
-.port-blue{background:var(--blue-t)}.port-amber{background:var(--amber-t)}
-.port-teal{background:var(--teal-t)}.port-pink{background:var(--pink-t)}
-.port-green{background:var(--green-t)}.port-red{background:var(--red-t)}
-.port-gray{background:var(--gray-t)}
+.sidebar-footer {
+  padding: 10px 8px;
+  border-top: 1px solid var(--b0);
+}
+.btn-new-flow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--b1);
+  border: 1px solid var(--b2);
+  border-radius: var(--r);
+  color: var(--t1);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Geist', sans-serif;
+}
+.btn-new-flow:hover { background: var(--b2); border-color: var(--b3); }
+.btn-new-flow svg { opacity: 0.7; }
 
-/* NODE TOOLBAR (appears on hover) */
-.node-toolbar{position:absolute;top:-30px;right:0;background:var(--s2);border:1px solid var(--b2);border-radius:6px;display:none;gap:1px;padding:3px;z-index:20}
-.node:hover .node-toolbar,.node.selected .node-toolbar{display:flex}
-.ntb-btn{width:22px;height:22px;border-radius:4px;border:none;background:transparent;color:var(--t2);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .1s}
-.ntb-btn:hover{background:var(--s3);color:var(--t1)}
+/* ── MAIN ───────────────────────────────────────────────────────────── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-/* BADGE */
-.badge{font-size:9px;padding:2px 6px;border-radius:3px;font-weight:500}
-.badge-actie{background:var(--pink-bg);color:var(--pink-t)}
-.badge-warn{background:var(--red-bg);color:var(--red-t)}
-.badge-ok{background:var(--green-bg);color:var(--green-t)}
-.badge-info{background:var(--blue-bg);color:var(--blue-t)}
+/* ── TOOLBAR ────────────────────────────────────────────────────────── */
+.toolbar {
+  height: 52px;
+  flex-shrink: 0;
+  background: var(--s1);
+  border-bottom: 1px solid var(--b0);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 8px;
+  z-index: 10;
+}
+.tb-title-area { flex: 1; display: flex; align-items: baseline; gap: 8px; overflow: hidden; }
+.tb-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--t1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.3px;
+}
+.tb-meta {
+  font-size: 10px;
+  color: var(--t3);
+  font-family: 'Geist Mono', monospace;
+  white-space: nowrap;
+}
+.tb-sep { width: 1px; height: 22px; background: var(--b1); flex-shrink: 0; }
 
-/* ── PANELS ── */
-.panel{position:fixed;right:0;top:0;width:260px;height:100vh;background:var(--s1);border-left:1px solid var(--b1);padding:18px 16px;overflow-y:auto;transform:translateX(100%);transition:transform .18s;z-index:50}
-.panel.open{transform:none}
-.panel-close{float:right;cursor:pointer;color:var(--t3);font-size:16px;background:none;border:none;font-family:'DM Sans',sans-serif}
-.panel-title{font-size:13px;font-weight:500;margin-bottom:3px}
-.panel-sub{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;margin-bottom:16px}
-.field{margin-bottom:13px}
-.field label{font-size:9px;color:var(--t3);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.07em}
-.field input,.field select,.field textarea{width:100%;background:var(--bg);border:1px solid var(--b1);border-radius:5px;padding:6px 8px;color:var(--t1);font-size:11px;font-family:'DM Sans',sans-serif;resize:vertical}
-.field input:focus,.field select,.field textarea:focus{outline:none;border-color:var(--acc)}
-.field select{appearance:none;cursor:pointer}
-.color-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:4px}
-.color-swatch{width:100%;aspect-ratio:1;border-radius:4px;border:2px solid transparent;cursor:pointer;transition:all .1s}
-.color-swatch.active{border-color:#fff}
-.panel-btn{width:100%;padding:7px;background:var(--blue-bg);border:1px solid var(--blue);border-radius:5px;color:var(--blue-t);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:4px}
-.panel-btn:hover{background:var(--blue);color:#fff}
-.panel-btn.danger{background:var(--red-bg);border-color:var(--red);color:var(--red-t)}
-.panel-btn.danger:hover{background:var(--red)}
+.tb-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px;
+  background: var(--s2);
+  border: 1px solid var(--b1);
+  border-radius: var(--r);
+  color: var(--t2);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  font-family: 'Geist', sans-serif;
+}
+.tb-btn:hover { background: var(--b1); color: var(--t1); border-color: var(--b2); }
+.tb-btn.primary {
+  background: var(--acc);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 0 12px var(--acc-glow);
+}
+.tb-btn.primary:hover { background: #6690ff; box-shadow: 0 0 20px var(--acc-glow); }
+.tb-btn.active {
+  background: var(--teal-bg);
+  border-color: var(--teal-border);
+  color: var(--teal-t);
+}
+.tb-btn svg { width: 13px; height: 13px; }
 
-/* ── MODALS ── */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center}
-.modal-bg.open{display:flex}
-.modal{background:var(--s2);border:1px solid var(--b2);border-radius:11px;padding:22px;width:320px}
-.modal h3{font-size:14px;font-weight:500;margin-bottom:14px}
-.modal input,.modal select{width:100%;background:var(--bg);border:1px solid var(--b1);border-radius:5px;padding:7px 9px;color:var(--t1);font-size:12px;font-family:'DM Sans',sans-serif;margin-bottom:8px}
-.modal input:focus,.modal select:focus{outline:none;border-color:var(--acc)}
-.modal-btns{display:flex;gap:7px;justify-content:flex-end;margin-top:8px}
-.mbtn{padding:7px 14px;border-radius:5px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--b1);background:transparent;color:var(--t2)}
-.mbtn:hover{background:var(--s3);color:var(--t1)}
-.mbtn.primary{background:var(--blue-bg);border-color:var(--blue);color:var(--blue-t)}
-.mbtn.primary:hover{background:var(--blue);color:#fff}
+/* ── CANVAS AREA ─────────────────────────────────────────────────────── */
+.canvas-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+  cursor: default;
+}
+/* Subtle dot grid */
+.canvas-wrap::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, var(--b0) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
 
-/* ── LEGEND ── */
-.legend{position:absolute;bottom:16px;left:16px;background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:8px 12px;display:flex;gap:12px;flex-wrap:wrap;font-size:10px;color:var(--t3);pointer-events:none}
-.leg-item{display:flex;align-items:center;gap:5px}
-.leg-dot{width:7px;height:7px;border-radius:50%}
+#canvas {
+  position: absolute;
+  top: 0; left: 0;
+  transform-origin: 0 0;
+  z-index: 1;
+}
+#canvas.panning { cursor: grabbing; }
 
-/* ── MINIMAP ── */
-.minimap{position:absolute;bottom:16px;right:16px;background:var(--s1);border:1px solid var(--b1);border-radius:8px;overflow:hidden}
-.minimap canvas{display:block}
+#edgeSvg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 3000px; height: 3000px;
+  pointer-events: none;
+}
+#edgeSvg path.edge-path { pointer-events: stroke; }
 
-/* ── EMPTY ── */
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--t3);text-align:center;gap:8px}
-.empty h3{font-size:15px;font-weight:400}
-.empty p{font-size:11px}
+.edge-path {
+  fill: none;
+  stroke-width: 1.5;
+  opacity: 0.65;
+  transition: opacity 0.15s;
+  cursor: pointer;
+}
+.edge-path:hover { opacity: 1; stroke-width: 2.5; }
+.edge-drawing {
+  fill: none;
+  stroke: var(--acc);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+  opacity: 0.8;
+}
+.edge-label-bg { fill: var(--s2); stroke: var(--b1); stroke-width: 1; rx: 4; }
+.edge-label-txt {
+  fill: var(--t2);
+  font-size: 9px;
+  font-family: 'Geist Mono', monospace;
+  pointer-events: none;
+}
 
-/* HINT */
-.hint{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--s2);border:1px solid var(--b1);border-radius:20px;padding:5px 14px;font-size:10px;color:var(--t3);pointer-events:none;opacity:0;transition:opacity .3s}
-.hint.show{opacity:1}
+/* ── EMPTY STATE ─────────────────────────────────────────────────────── */
+#emptyState {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 12px;
+  z-index: 2;
+}
+.empty-icon {
+  width: 52px; height: 52px;
+  background: var(--s2);
+  border: 1px solid var(--b1);
+  border-radius: var(--r-lg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  color: var(--t3);
+}
+.empty-title { font-size: 15px; font-weight: 600; color: var(--t2); }
+.empty-sub { font-size: 12px; color: var(--t3); }
 
-::-webkit-scrollbar{width:3px;height:3px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+/* ── NODES ──────────────────────────────────────────────────────────── */
+.node {
+  position: absolute;
+  width: var(--node-w);
+  background: var(--s2);
+  border: 1px solid var(--b1);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s, border-color 0.2s, transform 0.12s;
+  overflow: visible;
+}
+.node:hover { border-color: var(--b3); box-shadow: var(--shadow-lg); z-index: 10; }
+.node.selected {
+  border-color: var(--acc);
+  box-shadow: 0 0 0 2px var(--acc-glow), var(--shadow-lg);
+  z-index: 11;
+}
+
+/* Node toolbar (shows on hover) */
+.node-toolbar {
+  position: absolute;
+  top: -32px; right: 0;
+  display: none;
+  background: var(--s1);
+  border: 1px solid var(--b2);
+  border-radius: var(--r);
+  padding: 2px 3px;
+  gap: 1px;
+  z-index: 20;
+  box-shadow: var(--shadow);
+  flex-direction: row;
+}
+.node:hover .node-toolbar { display: flex; }
+
+.ntb-btn {
+  width: 24px; height: 24px;
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+  color: var(--t2);
+  font-size: 11px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.12s, color 0.12s;
+}
+.ntb-btn:hover { background: var(--b2); color: var(--t1); }
+.ntb-btn.danger:hover { background: var(--red-bg); color: var(--red-t); }
+
+/* Node header */
+.node-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  cursor: grab;
+  border-bottom: 1px solid rgba(0,0,0,0.2);
+}
+.node-header:active { cursor: grabbing; }
+.node-header span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  flex: 1;
+  outline: none;
+}
+.node-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+/* Header color variants */
+.nh-blue   { background: var(--blue-bg);  color: var(--blue-t);  border-bottom-color: var(--blue-border); }
+.nh-amber  { background: var(--amber-bg); color: var(--amber-t); border-bottom-color: var(--amber-border);}
+.nh-teal   { background: var(--teal-bg);  color: var(--teal-t);  border-bottom-color: var(--teal-border); }
+.nh-pink   { background: var(--pink-bg);  color: var(--pink-t);  border-bottom-color: var(--pink-border); }
+.nh-green  { background: var(--green-bg); color: var(--green-t); border-bottom-color: var(--green-border);}
+.nh-red    { background: var(--red-bg);   color: var(--red-t);   border-bottom-color: var(--red-border);  }
+.nh-gray   { background: var(--gray-bg);  color: var(--gray-t);  border-bottom-color: var(--gray-border); }
+/* Dot color variants */
+.nd-blue   { background: var(--blue-t);  box-shadow: 0 0 6px var(--blue);  }
+.nd-amber  { background: var(--amber-t); box-shadow: 0 0 6px var(--amber); }
+.nd-teal   { background: var(--teal-t);  box-shadow: 0 0 6px var(--teal);  }
+.nd-pink   { background: var(--pink-t);  box-shadow: 0 0 6px var(--pink);  }
+.nd-green  { background: var(--green-t); box-shadow: 0 0 6px var(--green); }
+.nd-red    { background: var(--red-t);   box-shadow: 0 0 6px var(--red);   }
+.nd-gray   { background: var(--gray-t);  box-shadow: 0 0 4px var(--gray);  }
+
+/* Node body */
+.node-body { padding: 9px 10px 6px; }
+.node-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--t1);
+  outline: none;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+.node-desc {
+  font-size: 10px;
+  color: var(--t2);
+  line-height: 1.55;
+  outline: none;
+}
+.node-footer {
+  border-top: 1px solid var(--b0);
+  padding: 5px 10px;
+  font-size: 9px;
+  color: var(--t3);
+  font-family: 'Geist Mono', monospace;
+  letter-spacing: 0.01em;
+  outline: none;
+}
+
+/* Ports */
+.port {
+  position: absolute;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  background: var(--b3);
+  cursor: crosshair;
+  transition: transform 0.12s, box-shadow 0.12s;
+  z-index: 5;
+}
+.port:hover { transform: scale(1.4); }
+.port-out { right: -5px; }
+.port-in  { left:  -5px; pointer-events: none; }
+/* Port color variants */
+.port-blue  { background: var(--blue-t);  border-color: var(--blue-bg); }
+.port-amber { background: var(--amber-t); border-color: var(--amber-bg);}
+.port-teal  { background: var(--teal-t);  border-color: var(--teal-bg); }
+.port-pink  { background: var(--pink-t);  border-color: var(--pink-bg); }
+.port-green { background: var(--green-t); border-color: var(--green-bg);}
+.port-red   { background: var(--red-t);   border-color: var(--red-bg);  }
+.port-gray  { background: var(--gray-t);  border-color: var(--gray-bg); }
+
+/* ── BOTTOM BAR ──────────────────────────────────────────────────────── */
+.bottom-bar {
+  position: absolute;
+  bottom: 14px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--s1);
+  border: 1px solid var(--b2);
+  border-radius: 40px;
+  padding: 5px 10px;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(12px);
+}
+.bb-legend { display: flex; align-items: center; gap: 10px; }
+.leg-item { display: flex; align-items: center; gap: 5px; }
+.leg-dot { width: 6px; height: 6px; border-radius: 50%; }
+.leg-item span { font-size: 9px; color: var(--t2); font-family: 'Geist Mono', monospace; }
+.bb-sep { width: 1px; height: 14px; background: var(--b2); }
+
+/* ── MINIMAP ─────────────────────────────────────────────────────────── */
+.minimap-wrap {
+  position: absolute;
+  bottom: 14px; right: 14px;
+  z-index: 15;
+  background: var(--s1);
+  border: 1px solid var(--b1);
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+#minimap { display: block; }
+
+/* ── NODE PANEL ──────────────────────────────────────────────────────── */
+.node-panel {
+  position: absolute;
+  top: 0; right: 0;
+  width: 260px;
+  height: 100%;
+  background: var(--s1);
+  border-left: 1px solid var(--b0);
+  z-index: 30;
+  transform: translateX(100%);
+  transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 32px #00000044;
+}
+.node-panel.open { transform: translateX(0); }
+
+.panel-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--b0);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.panel-title { font-size: 13px; font-weight: 600; letter-spacing: -0.2px; }
+.panel-sub   { font-size: 10px; color: var(--t3); margin-top: 2px; font-family: 'Geist Mono', monospace; }
+.panel-close {
+  width: 26px; height: 26px;
+  background: var(--s2);
+  border: 1px solid var(--b1);
+  border-radius: 6px;
+  color: var(--t2);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.12s;
+}
+.panel-close:hover { background: var(--b1); color: var(--t1); }
+
+.panel-body { flex: 1; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; }
+.panel-body::-webkit-scrollbar { width: 3px; }
+.panel-body::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 10px; }
+
+.field-group { display: flex; flex-direction: column; gap: 5px; }
+.field-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+.field-input, .field-textarea {
+  background: var(--s2);
+  border: 1px solid var(--b1);
+  border-radius: var(--r);
+  color: var(--t1);
+  font-family: 'Geist', sans-serif;
+  font-size: 12px;
+  padding: 8px 10px;
+  transition: border-color 0.12s;
+  outline: none;
+  resize: none;
+}
+.field-input:focus, .field-textarea:focus { border-color: var(--acc); }
+.field-textarea { min-height: 64px; line-height: 1.5; }
+
+.color-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.color-swatch {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.12s, border-color 0.12s;
+}
+.color-swatch:hover { transform: scale(1.12); }
+.color-swatch.active { border-color: #fff; transform: scale(1.1); }
+
+.panel-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--b0);
+}
+.btn-delete-node {
+  width: 100%;
+  padding: 8px;
+  background: var(--red-bg);
+  border: 1px solid var(--red-border);
+  border-radius: var(--r);
+  color: var(--red-t);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'Geist', sans-serif;
+  transition: all 0.12s;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.btn-delete-node:hover { background: #3d0808; }
+
+/* ── MODAL ───────────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: #00000088;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--s1);
+  border: 1px solid var(--b2);
+  border-radius: var(--r-xl);
+  width: 380px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.modal-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--b0);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.modal-body {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--b0);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modal-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--t3); margin-bottom: 5px; }
+.modal-input, .modal-select {
+  width: 100%;
+  background: var(--s2);
+  border: 1px solid var(--b1);
+  border-radius: var(--r);
+  color: var(--t1);
+  font-family: 'Geist', sans-serif;
+  font-size: 12px;
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color 0.12s;
+}
+.modal-input:focus, .modal-select:focus { border-color: var(--acc); }
+.modal-select option { background: var(--s2); }
+
+.btn-cancel {
+  padding: 8px 16px;
+  background: var(--s2);
+  border: 1px solid var(--b1);
+  border-radius: var(--r);
+  color: var(--t2);
+  font-size: 12px;
+  font-family: 'Geist', sans-serif;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.btn-cancel:hover { background: var(--b1); color: var(--t1); }
+
+.btn-confirm {
+  padding: 8px 16px;
+  background: var(--acc);
+  border: none;
+  border-radius: var(--r);
+  color: #fff;
+  font-size: 12px;
+  font-family: 'Geist', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s;
+  box-shadow: 0 0 12px var(--acc-glow);
+}
+.btn-confirm:hover { background: #6690ff; }
+
+/* ── HINT TOAST ──────────────────────────────────────────────────────── */
+#hint {
+  position: fixed;
+  bottom: 70px; left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--s1);
+  border: 1px solid var(--b2);
+  border-radius: 20px;
+  padding: 7px 16px;
+  font-size: 11px;
+  color: var(--t1);
+  box-shadow: var(--shadow);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  font-family: 'Geist Mono', monospace;
+}
+#hint.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 <div class="app">
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <div class="sb-logo">
-    <div class="sb-logo-name">Zelesta Group</div>
-    <div class="sb-logo-sub">SOP Dashboard</div>
-  </div>
-  <div class="sb-section">Workflows</div>
-  <div class="flow-list" id="flowList"></div>
-  <button class="btn-new" onclick="openNewFlow()">＋ Nieuwe workflow</button>
-</div>
-
-<!-- MAIN -->
-<div class="main">
-  <div class="topbar">
-    <div class="tb-title" id="tbTitle">—</div>
-    <div class="tb-meta" id="tbMeta"></div>
-    <div class="tb-sep"></div>
-    <button class="tb-btn" onclick="addNode()">＋ Node</button>
-    <button class="tb-btn" onclick="toggleEditMode()" id="editBtn">✎ Bewerken</button>
-    <button class="tb-btn primary" onclick="saveAll()" title="Opslaan (Ctrl+S)">↓ Opslaan</button>
-    <button class="tb-btn" onclick="fitView()" title="Scherm passen">⊞ Fit</button>
-  </div>
-
-  <div class="canvas-wrap" id="canvasWrap">
-    <div id="emptyState" class="empty">
-      <h3>Selecteer een workflow</h3>
-      <p>Of maak er een aan via de sidebar</p>
-    </div>
-    <div id="canvasHolder" style="display:none;position:relative;width:100%;height:100%">
-      <div class="grid-bg"></div>
-      <div class="canvas" id="canvas">
-        <svg class="edge-layer" id="edgeSvg" style="position:absolute;top:0;left:0;width:4000px;height:4000px;overflow:visible"></svg>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">Z</div>
+      <div>
+        <div class="brand-text">Zelesta Group</div>
+        <div class="brand-sub">SOP Dashboard</div>
       </div>
-      <div class="hint" id="hint"></div>
-      <div class="legend" id="legend"></div>
-      <canvas class="minimap" id="minimap" width="120" height="80"></canvas>
     </div>
-  </div>
-</div>
+    <div class="sidebar-section">Workflows</div>
+    <div class="flow-list" id="flowList"></div>
+    <div class="sidebar-footer">
+      <button class="btn-new-flow" onclick="openNewFlow()">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" width="13" height="13">
+          <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Nieuwe workflow
+      </button>
+    </div>
+  </aside>
 
-</div><!-- /app -->
+  <!-- MAIN -->
+  <main class="main">
 
-<!-- NODE PANEL -->
-<div class="panel" id="nodePanel">
-  <button class="panel-close" onclick="closePanel()">✕</button>
-  <div class="panel-title" id="panelTitle">Node</div>
-  <div class="panel-sub" id="panelSub"></div>
-  <div class="field"><label>Titel (header)</label><input id="pTitle" oninput="updateNodeField('title',this.value)"></div>
-  <div class="field"><label>Label</label><input id="pLabel" oninput="updateNodeField('label',this.value)"></div>
-  <div class="field"><label>Beschrijving</label><textarea id="pDesc" rows="3" oninput="updateNodeField('desc',this.value)"></textarea></div>
-  <div class="field"><label>Voetnoot</label><input id="pFooter" oninput="updateNodeField('footer',this.value)"></div>
-  <div class="field">
-    <label>Kleur</label>
-    <div class="color-grid" id="colorGrid"></div>
-  </div>
-  <button class="panel-btn danger" onclick="deleteSelectedNode()">🗑 Node verwijderen</button>
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="tb-title-area">
+        <div class="tb-title" id="tbTitle">Selecteer een workflow</div>
+        <div class="tb-meta" id="tbMeta"></div>
+      </div>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" onclick="addNode()">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Node
+      </button>
+      <button class="tb-btn" id="editBtn" onclick="toggleEditMode()">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M11 2l3 3-8 8H3v-3L11 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        Bewerken
+      </button>
+      <button class="tb-btn" onclick="saveAll()">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M3 4.5A1.5 1.5 0 014.5 3h5.879a1.5 1.5 0 011.06.44l1.122 1.12A1.5 1.5 0 0113 5.62V11.5A1.5 1.5 0 0111.5 13h-7A1.5 1.5 0 013 11.5v-7z" stroke="currentColor" stroke-width="1.2"/><path d="M5 3v3.5h6V3M5 13v-3.5h6V13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Opslaan
+      </button>
+      <button class="tb-btn" onclick="fitView()">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>
+        Fit
+      </button>
+    </div>
+
+    <!-- CANVAS -->
+    <div class="canvas-wrap" id="canvasWrap">
+
+      <!-- Empty state -->
+      <div id="emptyState">
+        <div class="empty-icon">⬡</div>
+        <div class="empty-title">Selecteer een workflow</div>
+        <div class="empty-sub">Of maak er een aan via de sidebar</div>
+      </div>
+
+      <!-- Graph holder -->
+      <div id="canvasHolder" style="display:none; position:absolute; inset:0;">
+        <svg id="edgeSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div id="canvas"></div>
+      </div>
+
+      <!-- Bottom legend bar -->
+      <div class="bottom-bar" id="bottomBar" style="display:none;">
+        <div class="bb-legend" id="legend"></div>
+      </div>
+
+      <!-- Minimap -->
+      <div class="minimap-wrap">
+        <canvas id="minimap" width="120" height="80"></canvas>
+      </div>
+    </div>
+
+    <!-- NODE PANEL -->
+    <div class="node-panel" id="nodePanel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title" id="panelTitle">Node</div>
+          <div class="panel-sub" id="panelSub"></div>
+        </div>
+        <button class="panel-close" onclick="closePanel()">✕</button>
+      </div>
+      <div class="panel-body">
+        <div class="field-group">
+          <div class="field-label">Titel (header)</div>
+          <input class="field-input" id="pTitle" placeholder="Route A…" oninput="updateNodeField('title',this.value)"/>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Label</div>
+          <input class="field-input" id="pLabel" placeholder="Korte omschrijving" oninput="updateNodeField('label',this.value)"/>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Beschrijving</div>
+          <textarea class="field-textarea" id="pDesc" placeholder="Details…" oninput="updateNodeField('desc',this.value)"></textarea>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Voetnoot</div>
+          <input class="field-input" id="pFooter" placeholder="trigger → start" oninput="updateNodeField('footer',this.value)"/>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Kleur</div>
+          <div class="color-grid" id="colorGrid"></div>
+        </div>
+      </div>
+      <div class="panel-footer">
+        <button class="btn-delete-node" onclick="deleteSelectedNode()">
+          <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 9a1 1 0 001 1h6a1 1 0 001-1l1-9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Node verwijderen
+        </button>
+      </div>
+    </div>
+
+  </main>
 </div>
 
 <!-- NEW FLOW MODAL -->
-<div class="modal-bg" id="newFlowModal">
+<div class="modal-overlay" id="newFlowModal">
   <div class="modal">
-    <h3>Nieuwe workflow</h3>
-    <input type="text" id="mfName" placeholder="Naam (bijv. Producten toevoegen)">
-    <input type="text" id="mfOwner" placeholder="Eigenaar (bijv. Webshop team)">
-    <select id="mfColor">
-      <option value="blue">Blauw</option><option value="teal">Teal</option>
-      <option value="amber">Amber</option><option value="pink">Roze</option>
-      <option value="green">Groen</option>
-    </select>
-    <div class="modal-btns">
-      <button class="mbtn" onclick="closeModal('newFlowModal')">Annuleren</button>
-      <button class="mbtn primary" onclick="createFlow()">Aanmaken</button>
+    <div class="modal-header">
+      Nieuwe workflow
+      <button class="panel-close" onclick="closeModal('newFlowModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="modal-label">Naam</div>
+        <input class="modal-input" id="mfName" placeholder="Bijv. Retour verwerken"/>
+      </div>
+      <div>
+        <div class="modal-label">Eigenaar</div>
+        <input class="modal-input" id="mfOwner" placeholder="Bijv. Webshop Operations"/>
+      </div>
+      <div>
+        <div class="modal-label">Kleur</div>
+        <select class="modal-select" id="mfColor">
+          <option value="blue">Blauw</option>
+          <option value="teal">Teal</option>
+          <option value="amber">Amber</option>
+          <option value="pink">Roze</option>
+          <option value="green">Groen</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('newFlowModal')">Annuleren</button>
+      <button class="btn-confirm" onclick="createFlow()">Aanmaken</button>
     </div>
   </div>
 </div>
 
+<!-- HINT TOAST -->
+<div id="hint"></div>
+
 <script>
-// ── CONSTANTS ──────────────────────────────────────────────────────────
+// ── CONSTANTS ────────────────────────────────────────────────────────────
 const COLORS = {
-  blue:'#3b7df8',amber:'#e09020',teal:'#0e9f8e',
-  pink:'#c42070',green:'#18a84a',red:'#e02020',gray:'#4a5570'
+  blue:'#4a7cf8', amber:'#e8982a', teal:'#12b09e',
+  pink:'#d42680', green:'#1ab84e', red:'#e83030', gray:'#4a5870'
 };
 const COLOR_NAMES = Object.keys(COLORS);
 
-// ── STATE ──────────────────────────────────────────────────────────────
+// ── STATE ────────────────────────────────────────────────────────────────
 let flows = {};
 let activeFlowId = null;
 let editMode = false;
 let selectedNodeId = null;
-let pan = {x:0,y:0};
+let pan = {x:0, y:0};
 let zoom = 1;
-let dragging = null;   // {nodeId, offX, offY}
-let panning = null;    // {startX,startY,panX,panY}
-let drawingEdge = null; // {fromId, portY}
-let mousePos = {x:0,y:0};
+let dragging = null;
+let panning = null;
+let drawingEdge = null;
+let mousePos = {x:0, y:0};
 let nodeIdCounter = 1;
 let edgeIdCounter = 1;
 
-// ── INITIAL DATA ───────────────────────────────────────────────────────
+// ── INITIAL DATA ─────────────────────────────────────────────────────────
 function makeId(prefix){ return prefix + '_' + (nodeIdCounter++); }
 
 const INIT_FLOW = {
-  id:'prijzen', name:'Prijzen aanpassen', owner:'Webshop Operations',
-  version:'v2.0', color:'blue',
+  id:'prijzen', name:'Prijzen aanpassen', owner:'Webshop Operations', version:'v2.0', color:'blue',
   nodes:[
-    {id:'n1',x:30,y:250,color:'blue',title:'Trigger',label:'Slack-bericht ontvangen',desc:'Van Dominique (Head of Marketing/Sales)',footer:'trigger → start'},
-    {id:'n2',x:290,y:110,color:'blue',title:'Route A',label:'Concreet bericht',desc:'Prijs staat in bericht → ga direct naar Shopify',footer:'skip opzoeken'},
-    {id:'n3',x:290,y:300,color:'amber',title:'Route B',label:'Signaal-bericht',desc:'Prijs klopt niet, geen nieuwe prijs vermeld',footer:'opzoeken vereist'},
-    {id:'n4',x:290,y:490,color:'pink',title:'Route C — Actie',label:'Actie-bericht',desc:'Product tijdelijk in actie, actieprijs instellen',footer:'vergelijkingsprijs nodig'},
-    {id:'n5',x:550,y:290,color:'amber',title:'Prijslijst B2C',label:'Google Sheet opzoeken',desc:'Sales Drive → kolom "Sales price NL/DE/FR" per maat',footer:'bron van waarheid'},
-    {id:'n6',x:550,y:490,color:'pink',title:'Actie instellen',label:'Basisprijs + Vergelijkingsprijs',desc:'Basisprijs = actieprijs. Vergelijkingsprijs = origineel.',footer:'einddatum noteren'},
-    {id:'n7',x:810,y:220,color:'teal',title:'Shopify Bulk Edit',label:'Producten selecteren & prijzen invullen',desc:'Admin → filter → Bulk bewerken. Elke kleur = apart product.',footer:'alle varianten'},
-    {id:'n8',x:810,y:420,color:'green',title:'Opslaan',label:'Controleren & opslaan',desc:'Visueel controleren vóór het opslaan',footer:'definitief'},
-    {id:'n9',x:810,y:590,color:'green',title:'Bevestiging',label:'Slack terugkoppeling',desc:'Zelfde thread: productnaam + varianten + nieuwe prijzen',footer:'output → done'},
-    {id:'n10',x:550,y:620,color:'pink',title:'Na de actie',label:'Prijzen terugzetten',desc:'Basisprijs → origineel. Vergelijkingsprijs leegmaken.',footer:'anders blijft actie zichtbaar'},
-    {id:'n11',x:30,y:530,color:'red',title:'Valkuilen',label:'Veelgemaakte fouten',desc:'Verkeerde markt · Niet alle varianten · Vergelijkingsprijs vergeten · Originele prijs niet genoteerd',footer:'altijd controleren'}
+    {id:'n1', x:30,  y:250, color:'blue',  title:'Trigger',        label:'Slack-bericht ontvangen',          desc:'Van Dominique (Head of Marketing/Sales)',                                  footer:'trigger → start'},
+    {id:'n2', x:290, y:110, color:'blue',  title:'Route A',        label:'Concreet bericht',                 desc:'Prijs staat in bericht → ga direct naar Shopify',                         footer:'skip opzoeken'},
+    {id:'n3', x:290, y:300, color:'amber', title:'Route B',        label:'Signaal-bericht',                  desc:'Prijs klopt niet, geen nieuwe prijs vermeld',                             footer:'opzoeken vereist'},
+    {id:'n4', x:290, y:490, color:'pink',  title:'Route C — Actie',label:'Actie-bericht',                   desc:'Product tijdelijk in actie, actieprijs instellen',                        footer:'vergelijkingsprijs nodig'},
+    {id:'n5', x:550, y:290, color:'amber', title:'Prijslijst B2C', label:'Google Sheet opzoeken',            desc:'Sales Drive → kolom "Sales price NL/DE/FR" per maat',                     footer:'bron van waarheid'},
+    {id:'n6', x:550, y:490, color:'pink',  title:'Actie instellen',label:'Basisprijs + Vergelijkingsprijs', desc:'Basisprijs = actieprijs. Vergelijkingsprijs = origineel.',                  footer:'einddatum noteren'},
+    {id:'n7', x:810, y:220, color:'teal',  title:'Shopify Bulk Edit',label:'Producten selecteren & prijzen invullen', desc:'Admin → filter → Bulk bewerken. Elke kleur = apart product.',  footer:'alle varianten'},
+    {id:'n8', x:810, y:420, color:'green', title:'Opslaan',        label:'Controleren & opslaan',            desc:'Visueel controleren vóór het opslaan',                                    footer:'definitief'},
+    {id:'n9', x:810, y:590, color:'green', title:'Bevestiging',    label:'Slack terugkoppeling',             desc:'Zelfde thread: productnaam + varianten + nieuwe prijzen',                  footer:'output → done'},
+    {id:'n10',x:550, y:620, color:'pink',  title:'Na de actie',    label:'Prijzen terugzetten',              desc:'Basisprijs → origineel. Vergelijkingsprijs leegmaken.',                    footer:'anders blijft actie zichtbaar'},
+    {id:'n11',x:30,  y:530, color:'red',   title:'Valkuilen',      label:'Veelgemaakte fouten',              desc:'Verkeerde markt · Niet alle varianten · Vergelijkingsprijs vergeten · Originele prijs niet genoteerd', footer:'altijd controleren'}
   ],
   edges:[
-    {id:'e1',from:'n1',to:'n2',color:'#3b7df8',label:'prijs bekend'},
-    {id:'e2',from:'n1',to:'n3',color:'#e09020',label:'geen prijs'},
-    {id:'e3',from:'n1',to:'n4',color:'#c42070',label:'actie'},
-    {id:'e4',from:'n3',to:'n5',color:'#e09020',label:''},
-    {id:'e5',from:'n4',to:'n6',color:'#c42070',label:''},
-    {id:'e6',from:'n2',to:'n7',color:'#3b7df8',label:''},
-    {id:'e7',from:'n5',to:'n7',color:'#e09020',label:''},
-    {id:'e8',from:'n6',to:'n7',color:'#c42070',label:''},
-    {id:'e9',from:'n7',to:'n8',color:'#0e9f8e',label:''},
-    {id:'e10',from:'n8',to:'n9',color:'#18a84a',label:''},
-    {id:'e11',from:'n6',to:'n10',color:'#c42070',label:'na einddatum'},
-    {id:'e12',from:'n10',to:'n9',color:'#c42070',label:''}
+    {id:'e1', from:'n1', to:'n2', color:'#4a7cf8', label:'prijs bekend'},
+    {id:'e2', from:'n1', to:'n3', color:'#e8982a', label:'geen prijs'},
+    {id:'e3', from:'n1', to:'n4', color:'#d42680', label:'actie'},
+    {id:'e4', from:'n3', to:'n5', color:'#e8982a', label:''},
+    {id:'e5', from:'n4', to:'n6', color:'#d42680', label:''},
+    {id:'e6', from:'n2', to:'n7', color:'#4a7cf8', label:''},
+    {id:'e7', from:'n5', to:'n7', color:'#e8982a', label:''},
+    {id:'e8', from:'n6', to:'n7', color:'#d42680', label:''},
+    {id:'e9', from:'n7', to:'n8', color:'#12b09e', label:''},
+    {id:'e10',from:'n8', to:'n9', color:'#1ab84e', label:''},
+    {id:'e11',from:'n6', to:'n10',color:'#d42680', label:'na einddatum'},
+    {id:'e12',from:'n10',to:'n9', color:'#d42680', label:''}
   ],
   legend:[
-    {color:'#3b7df8',label:'Normale prijs'},{color:'#e09020',label:'Prijs opzoeken'},
-    {color:'#c42070',label:'Actieprijs'},{color:'#0e9f8e',label:'Shopify'},
-    {color:'#18a84a',label:'Afronden'},{color:'#e02020',label:'Waarschuwing'}
+    {color:'#4a7cf8',label:'Normale prijs'}, {color:'#e8982a',label:'Prijs opzoeken'},
+    {color:'#d42680',label:'Actieprijs'},    {color:'#12b09e',label:'Shopify'},
+    {color:'#1ab84e',label:'Afronden'},      {color:'#e83030',label:'Waarschuwing'}
   ]
 };
 
-// ── STORAGE ────────────────────────────────────────────────────────────
+// ── STORAGE ──────────────────────────────────────────────────────────────
 function saveAll(){
-  try{ localStorage.setItem('zelesta_flows', JSON.stringify(flows)); }catch(e){}
+  try{ localStorage.setItem('zelesta_flows_v3', JSON.stringify(flows)); }catch(e){}
   showHint('Opgeslagen ✓');
 }
 function loadStorage(){
   try{
-    const d = localStorage.getItem('zelesta_flows');
+    const d = localStorage.getItem('zelesta_flows_v3');
     if(d) flows = JSON.parse(d);
   }catch(e){}
   if(!Object.keys(flows).length) flows = {prijzen: JSON.parse(JSON.stringify(INIT_FLOW))};
 }
 
-// ── SIDEBAR ────────────────────────────────────────────────────────────
+// ── SIDEBAR ──────────────────────────────────────────────────────────────
 function renderSidebar(){
   const el = document.getElementById('flowList');
   el.innerHTML = '';
   Object.values(flows).forEach(f=>{
     const d = document.createElement('div');
     d.className = 'flow-item' + (f.id===activeFlowId?' active':'');
-    d.innerHTML = `<div class="flow-dot" style="background:${COLORS[f.color]||COLORS.blue}"></div>
+    d.innerHTML = `
+      <div class="flow-dot" style="background:${COLORS[f.color]||COLORS.blue}; color:${COLORS[f.color]||COLORS.blue}"></div>
       <span class="flow-name">${f.name}</span>
       <span class="flow-count">${(f.nodes||[]).length}</span>`;
     d.onclick = ()=>loadFlow(f.id);
@@ -335,13 +918,15 @@ function renderSidebar(){
   });
 }
 
-// ── LOAD FLOW ──────────────────────────────────────────────────────────
+// ── LOAD FLOW ────────────────────────────────────────────────────────────
 function loadFlow(id){
-  const f = flows[id]; if(!f) return;
+  const f = flows[id];
+  if(!f) return;
   activeFlowId = id;
   renderSidebar();
-  document.getElementById('emptyState').style.display='none';
-  document.getElementById('canvasHolder').style.display='block';
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('canvasHolder').style.display = 'block';
+  document.getElementById('bottomBar').style.display = 'flex';
   document.getElementById('tbTitle').textContent = f.name;
   document.getElementById('tbMeta').textContent = `${f.owner} · ${f.version||'v1.0'}`;
   renderLegend(f);
@@ -349,13 +934,12 @@ function loadFlow(id){
   fitView();
 }
 
-// ── RENDER GRAPH ───────────────────────────────────────────────────────
+// ── RENDER GRAPH ──────────────────────────────────────────────────────────
 function renderGraph(){
-  const f = flows[activeFlowId]; if(!f) return;
+  const f = flows[activeFlowId];
+  if(!f) return;
   const canvas = document.getElementById('canvas');
-  // Remove old nodes
   Array.from(canvas.querySelectorAll('.node')).forEach(n=>n.remove());
-  // Render nodes
   f.nodes.forEach(n => createNodeEl(n));
   renderEdges();
   renderMinimap();
@@ -368,12 +952,17 @@ function createNodeEl(n){
   el.id = 'node-'+n.id;
   el.style.left = n.x+'px';
   el.style.top  = n.y+'px';
-
   el.innerHTML = `
     <div class="node-toolbar">
-      <button class="ntb-btn" title="Bewerken" onclick="openNodePanel('${n.id}')">✎</button>
-      <button class="ntb-btn" title="Dupliceren" onclick="duplicateNode('${n.id}')">⧉</button>
-      <button class="ntb-btn" title="Verwijderen" onclick="deleteNode('${n.id}')">✕</button>
+      <button class="ntb-btn" title="Bewerken"   onclick="openNodePanel('${n.id}')">
+        <svg viewBox="0 0 16 16" fill="none" width="11" height="11"><path d="M11 2l3 3-8 8H3v-3L11 2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="ntb-btn" title="Dupliceren" onclick="duplicateNode('${n.id}')">
+        <svg viewBox="0 0 16 16" fill="none" width="11" height="11"><rect x="5" y="5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 11V3h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </button>
+      <button class="ntb-btn danger" title="Verwijderen" onclick="deleteNode('${n.id}')">
+        <svg viewBox="0 0 16 16" fill="none" width="11" height="11"><path d="M2 4h12M6 4V2h4v2M5 4l.8 9h4.4L11 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
     </div>
     <div class="node-header nh-${n.color}" id="nh-${n.id}">
       <div class="node-dot nd-${n.color}"></div>
@@ -381,36 +970,30 @@ function createNodeEl(n){
     </div>
     <div class="node-body">
       <div class="node-label" contenteditable="false" id="nl-${n.id}" onblur="fieldBlur('${n.id}','label',this.textContent)">${n.label||''}</div>
-      <div class="node-desc" contenteditable="false" id="nd-${n.id}" onblur="fieldBlur('${n.id}','desc',this.textContent)">${n.desc||''}</div>
+      <div class="node-desc"  contenteditable="false" id="nd-${n.id}" onblur="fieldBlur('${n.id}','desc',this.textContent)">${n.desc||''}</div>
     </div>
     ${n.footer?`<div class="node-footer" contenteditable="false" id="nf-${n.id}" onblur="fieldBlur('${n.id}','footer',this.textContent)">${n.footer}</div>`:''}
-    <div class="port port-out port-${n.color}" id="po-${n.id}" style="top:calc(50% - 5.5px)" title="Sleep om te verbinden"></div>
-    <div class="port port-in  port-${n.color}" id="pi-${n.id}" style="top:calc(50% - 5.5px)"></div>
+    <div class="port port-out port-${n.color}" id="po-${n.id}" style="top:calc(50% - 5px)" title="Sleep om te verbinden"></div>
+    <div class="port port-in  port-${n.color}" id="pi-${n.id}" style="top:calc(50% - 5px)"></div>
   `;
 
-  // Drag node via header
   const header = el.querySelector('.node-header');
   header.addEventListener('mousedown', e=>{
     if(e.target.closest('.ntb-btn')) return;
     if(drawingEdge) return;
     e.preventDefault();
     selectNode(n.id);
-    const rect = el.getBoundingClientRect();
     const wx = (e.clientX - pan.x) / zoom;
     const wy = (e.clientY - pan.y) / zoom;
     dragging = { nodeId:n.id, offX: wx-n.x, offY: wy-n.y };
   });
 
-  // Start edge drawing from out-port
   const portOut = el.querySelector('.port-out');
   portOut.addEventListener('mousedown', e=>{
-    e.stopPropagation();
-    e.preventDefault();
-    const rect = el.getBoundingClientRect();
+    e.stopPropagation(); e.preventDefault();
     drawingEdge = { fromId:n.id };
   });
 
-  // Connect edge to in-port
   const portIn = el.querySelector('.port-in');
   portIn.addEventListener('mouseup', e=>{
     e.stopPropagation();
@@ -421,7 +1004,6 @@ function createNodeEl(n){
     renderEdges();
   });
 
-  // Click to select
   el.addEventListener('click', e=>{
     if(e.target.closest('.ntb-btn')) return;
     selectNode(n.id);
@@ -430,7 +1012,7 @@ function createNodeEl(n){
   canvas.appendChild(el);
 }
 
-// ── SELECT ─────────────────────────────────────────────────────────────
+// ── SELECT ───────────────────────────────────────────────────────────────
 function selectNode(id){
   selectedNodeId = id;
   document.querySelectorAll('.node').forEach(n=>n.classList.remove('selected'));
@@ -438,16 +1020,17 @@ function selectNode(id){
   if(el) el.classList.add('selected');
 }
 
-// ── EDGES ──────────────────────────────────────────────────────────────
+// ── EDGES ────────────────────────────────────────────────────────────────
 function renderEdges(){
-  const f = flows[activeFlowId]; if(!f) return;
+  const f = flows[activeFlowId];
+  if(!f) return;
   const svg = document.getElementById('edgeSvg');
   svg.innerHTML = `<defs>
-    <marker id="arr" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
-      <polygon points="0 0, 7 2.5, 0 5" fill="#4a5570"/>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#38476a"/>
     </marker>
-    <marker id="arr-drawing" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
-      <polygon points="0 0, 7 2.5, 0 5" fill="${'#5b7fff'}"/>
+    <marker id="arr-drawing" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#4f7cff"/>
     </marker>
   </defs>`;
 
@@ -455,47 +1038,51 @@ function renderEdges(){
     const fromEl = document.getElementById('node-'+e.from);
     const toEl   = document.getElementById('node-'+e.to);
     if(!fromEl||!toEl) return;
-
-    const fx = parseFloat(fromEl.style.left)+196;
-    const fy = parseFloat(fromEl.style.top) + fromEl.offsetHeight/2;
+    const fx = parseFloat(fromEl.style.left) + 200;
+    const fy = parseFloat(fromEl.style.top)  + fromEl.offsetHeight/2;
     const tx = parseFloat(toEl.style.left);
-    const ty = parseFloat(toEl.style.top) + toEl.offsetHeight/2;
-    const cx = Math.abs(tx-fx)*0.5;
+    const ty = parseFloat(toEl.style.top)    + toEl.offsetHeight/2;
+    const cx = Math.max(Math.abs(tx-fx)*0.45, 40);
 
     const path = document.createElementNS('http://www.w3.org/2000/svg','path');
     path.setAttribute('class','edge-path');
     path.setAttribute('d',`M${fx},${fy} C${fx+cx},${fy} ${tx-cx},${ty} ${tx},${ty}`);
-    path.setAttribute('stroke', e.color||'#4a5570');
+    path.setAttribute('stroke', e.color||'#38476a');
     path.setAttribute('marker-end','url(#arr)');
-    path.style.cursor='pointer';
+    path.style.cursor = 'pointer';
     path.addEventListener('click',()=>{ if(confirm('Edge verwijderen?')) deleteEdge(e.id); });
     svg.appendChild(path);
 
     if(e.label){
       const mx=(fx+tx)/2, my=(fy+ty)/2-6;
       const bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
-      bg.setAttribute('x',mx-e.label.length*3); bg.setAttribute('y',my-9);
-      bg.setAttribute('width',e.label.length*6+6); bg.setAttribute('height',13);
-      bg.setAttribute('rx','3'); bg.setAttribute('class','edge-label-bg');
+      bg.setAttribute('x', mx - e.label.length*3.2 - 4);
+      bg.setAttribute('y', my - 8);
+      bg.setAttribute('width', e.label.length*6.4 + 8);
+      bg.setAttribute('height', 14);
+      bg.setAttribute('rx','4');
+      bg.setAttribute('class','edge-label-bg');
       svg.appendChild(bg);
+
       const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
-      txt.setAttribute('x',mx); txt.setAttribute('y',my);
-      txt.setAttribute('text-anchor','middle'); txt.setAttribute('class','edge-label-txt');
+      txt.setAttribute('x', mx);
+      txt.setAttribute('y', my+1);
+      txt.setAttribute('text-anchor','middle');
+      txt.setAttribute('class','edge-label-txt');
       txt.setAttribute('dominant-baseline','central');
       txt.textContent = e.label;
       svg.appendChild(txt);
     }
   });
 
-  // Live drawing edge
   if(drawingEdge){
     const fromEl = document.getElementById('node-'+drawingEdge.fromId);
     if(fromEl){
-      const fx = parseFloat(fromEl.style.left)+196;
-      const fy = parseFloat(fromEl.style.top)+fromEl.offsetHeight/2;
+      const fx = parseFloat(fromEl.style.left) + 200;
+      const fy = parseFloat(fromEl.style.top)  + fromEl.offsetHeight/2;
       const mx = (mousePos.x - pan.x)/zoom;
       const my = (mousePos.y - pan.y)/zoom;
-      const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+      const p  = document.createElementNS('http://www.w3.org/2000/svg','path');
       p.setAttribute('class','edge-drawing');
       p.setAttribute('d',`M${fx},${fy} C${fx+60},${fy} ${mx-60},${my} ${mx},${my}`);
       p.setAttribute('marker-end','url(#arr-drawing)');
@@ -505,25 +1092,27 @@ function renderEdges(){
 }
 
 function addEdge(fromId, toId){
-  const f = flows[activeFlowId]; if(!f) return;
+  const f = flows[activeFlowId];
+  if(!f) return;
   const fromNode = f.nodes.find(n=>n.id===fromId);
-  const color = COLORS[fromNode?.color]||'#4a5570';
+  const color    = COLORS[fromNode?.color]||'#38476a';
   f.edges = f.edges||[];
   const id = 'e'+edgeIdCounter++;
   f.edges.push({id, from:fromId, to:toId, color, label:''});
   saveAll();
 }
-
 function deleteEdge(id){
-  const f = flows[activeFlowId]; if(!f) return;
+  const f = flows[activeFlowId];
+  if(!f) return;
   f.edges = f.edges.filter(e=>e.id!==id);
   renderEdges();
   saveAll();
 }
 
-// ── NODE CRUD ──────────────────────────────────────────────────────────
+// ── NODE CRUD ─────────────────────────────────────────────────────────────
 function addNode(){
-  const f = flows[activeFlowId]; if(!f) return;
+  const f = flows[activeFlowId];
+  if(!f) return;
   const id = makeId('n');
   const cx = (-pan.x/zoom) + 200;
   const cy = (-pan.y/zoom) + 150;
@@ -536,21 +1125,22 @@ function addNode(){
   saveAll();
   showHint('Node toegevoegd');
 }
-
 function duplicateNode(id){
-  const f = flows[activeFlowId]; if(!f) return;
-  const src = f.nodes.find(n=>n.id===id); if(!src) return;
+  const f = flows[activeFlowId];
+  if(!f) return;
+  const src = f.nodes.find(n=>n.id===id);
+  if(!src) return;
   const newId = makeId('n');
-  const node = {...src, id:newId, x:src.x+220, y:src.y+20};
+  const node  = {...src, id:newId, x:src.x+220, y:src.y+20};
   f.nodes.push(node);
   createNodeEl(node);
   renderEdges();
   selectNode(newId);
   saveAll();
 }
-
 function deleteNode(id){
-  const f = flows[activeFlowId]; if(!f) return;
+  const f = flows[activeFlowId];
+  if(!f) return;
   f.nodes = f.nodes.filter(n=>n.id!==id);
   f.edges = (f.edges||[]).filter(e=>e.from!==id&&e.to!==id);
   document.getElementById('node-'+id)?.remove();
@@ -558,236 +1148,246 @@ function deleteNode(id){
   if(selectedNodeId===id){ selectedNodeId=null; closePanel(); }
   saveAll();
 }
-
 function deleteSelectedNode(){
   if(selectedNodeId) deleteNode(selectedNodeId);
 }
-
 function fieldBlur(nodeId, field, value){
-  const f = flows[activeFlowId]; if(!f) return;
-  const node = f.nodes.find(n=>n.id===nodeId); if(!node) return;
+  const f = flows[activeFlowId];
+  if(!f) return;
+  const node = f.nodes.find(n=>n.id===nodeId);
+  if(!node) return;
   node[field] = value.trim();
   saveAll();
 }
 
-// ── NODE PANEL ─────────────────────────────────────────────────────────
+// ── NODE PANEL ────────────────────────────────────────────────────────────
 function openNodePanel(id){
-  const f = flows[activeFlowId]; if(!f) return;
-  const node = f.nodes.find(n=>n.id===id); if(!node) return;
+  const f = flows[activeFlowId];
+  if(!f) return;
+  const node = f.nodes.find(n=>n.id===id);
+  if(!node) return;
   selectedNodeId = id;
   selectNode(id);
   document.getElementById('panelTitle').textContent = node.label||node.title||'Node';
-  document.getElementById('panelSub').textContent = 'id: '+id;
+  document.getElementById('panelSub').textContent   = 'id: '+id;
   document.getElementById('pTitle').value  = node.title||'';
   document.getElementById('pLabel').value  = node.label||'';
   document.getElementById('pDesc').value   = node.desc||'';
   document.getElementById('pFooter').value = node.footer||'';
-
-  // Color swatches
   const grid = document.getElementById('colorGrid');
-  grid.innerHTML='';
+  grid.innerHTML = '';
   COLOR_NAMES.forEach(c=>{
     const sw = document.createElement('div');
-    sw.className='color-swatch'+(node.color===c?' active':'');
-    sw.style.background=COLORS[c];
-    sw.onclick=()=>{ updateNodeColor(id,c); grid.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active')); sw.classList.add('active'); };
+    sw.className = 'color-swatch'+(node.color===c?' active':'');
+    sw.style.background = COLORS[c];
+    sw.onclick = ()=>{
+      updateNodeColor(id, c);
+      grid.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));
+      sw.classList.add('active');
+    };
     grid.appendChild(sw);
   });
-
   document.getElementById('nodePanel').classList.add('open');
 }
-
-function closePanel(){ document.getElementById('nodePanel').classList.remove('open'); }
-
+function closePanel(){
+  document.getElementById('nodePanel').classList.remove('open');
+}
 function updateNodeField(field, value){
   if(!selectedNodeId) return;
-  const f = flows[activeFlowId]; if(!f) return;
-  const node = f.nodes.find(n=>n.id===selectedNodeId); if(!node) return;
+  const f = flows[activeFlowId];
+  if(!f) return;
+  const node = f.nodes.find(n=>n.id===selectedNodeId);
+  if(!node) return;
   node[field] = value;
-  // Live update DOM
-  const map = {title:'nt-',label:'nl-',desc:'nd-',footer:'nf-'};
-  const el = document.getElementById((map[field]||'') + selectedNodeId);
+  const map = {title:'nt-', label:'nl-', desc:'nd-', footer:'nf-'};
+  const el  = document.getElementById((map[field]||'')+selectedNodeId);
   if(el) el.textContent = value;
   saveAll();
 }
-
 function updateNodeColor(id, color){
-  const f = flows[activeFlowId]; if(!f) return;
-  const node = f.nodes.find(n=>n.id===id); if(!node) return;
+  const f = flows[activeFlowId];
+  if(!f) return;
+  const node = f.nodes.find(n=>n.id===id);
+  if(!node) return;
   node.color = color;
-  // Update DOM classes
-  const el = document.getElementById('node-'+id); if(!el) return;
-  const header = el.querySelector('.node-header');
-  const dot = el.querySelector('.node-dot');
-  const portOut = el.querySelector('.port-out');
-  const portIn  = el.querySelector('.port-in');
-  header.className = 'node-header nh-'+color;
-  dot.className = 'node-dot nd-'+color;
-  portOut.className = 'port port-out port-'+color;
-  portIn.className  = 'port port-in port-'+color;
-  // Update edges color
+  const el = document.getElementById('node-'+id);
+  if(!el) return;
+  el.querySelector('.node-header').className = 'node-header nh-'+color;
+  el.querySelector('.node-dot').className    = 'node-dot nd-'+color;
+  el.querySelector('.port-out').className    = 'port port-out port-'+color;
+  el.querySelector('.port-in').className     = 'port port-in  port-'+color;
   (f.edges||[]).forEach(e=>{ if(e.from===id) e.color=COLORS[color]||e.color; });
   renderEdges();
   saveAll();
 }
 
-// ── EDIT MODE ──────────────────────────────────────────────────────────
+// ── EDIT MODE ─────────────────────────────────────────────────────────────
 function toggleEditMode(){
   editMode = !editMode;
   const btn = document.getElementById('editBtn');
-  btn.textContent = editMode ? '✓ Klaar' : '✎ Bewerken';
-  btn.style.background = editMode ? 'var(--teal-bg)' : '';
-  btn.style.borderColor = editMode ? 'var(--teal)' : '';
-  btn.style.color = editMode ? 'var(--teal-t)' : '';
-
+  btn.textContent = editMode ? '✓ Klaar' : '';
+  btn.innerHTML = editMode
+    ? `<svg viewBox="0 0 16 16" fill="none" width="13" height="13"><path d="M3 8l3 4 7-8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Klaar`
+    : `<svg viewBox="0 0 16 16" fill="none" width="13" height="13"><path d="M11 2l3 3-8 8H3v-3L11 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg> Bewerken`;
+  btn.className = 'tb-btn' + (editMode ? ' active' : '');
   document.querySelectorAll('.node-label,.node-desc,.node-footer,[id^="nt-"]').forEach(el=>{
     el.contentEditable = editMode ? 'true' : 'false';
   });
   showHint(editMode ? 'Bewerkmodus aan — klik op tekst om te editen' : 'Bewerkmodus uit');
 }
 
-// ── PAN & ZOOM ─────────────────────────────────────────────────────────
+// ── PAN & ZOOM ────────────────────────────────────────────────────────────
 function applyTransform(){
   document.getElementById('canvas').style.transform = `translate(${pan.x}px,${pan.y}px) scale(${zoom})`;
+  document.getElementById('edgeSvg').style.transform = `translate(${pan.x}px,${pan.y}px) scale(${zoom})`;
+  document.getElementById('edgeSvg').style.transformOrigin = '0 0';
 }
-
 function fitView(){
-  const f = flows[activeFlowId]; if(!f||!f.nodes.length) return;
-  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  const f = flows[activeFlowId];
+  if(!f||!f.nodes.length) return;
+  let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
   f.nodes.forEach(n=>{
     minX=Math.min(minX,n.x); minY=Math.min(minY,n.y);
     maxX=Math.max(maxX,n.x+200); maxY=Math.max(maxY,n.y+120);
   });
   const wrap = document.getElementById('canvasWrap');
-  const pw=wrap.clientWidth-80, ph=wrap.clientHeight-80;
+  const pw=wrap.clientWidth-100, ph=wrap.clientHeight-100;
   const fw=maxX-minX, fh=maxY-minY;
   zoom = Math.min(pw/fw, ph/fh, 1.2);
-  pan.x = (pw-fw*zoom)/2 + 40 - minX*zoom;
-  pan.y = (ph-fh*zoom)/2 + 40 - minY*zoom;
+  pan.x = (pw-fw*zoom)/2 + 50 - minX*zoom;
+  pan.y = (ph-fh*zoom)/2 + 50 - minY*zoom;
   applyTransform();
 }
 
-// ── HINT ───────────────────────────────────────────────────────────────
+// ── HINT ──────────────────────────────────────────────────────────────────
 let hintTimer;
 function showHint(msg){
   const el = document.getElementById('hint');
-  el.textContent=msg; el.classList.add('show');
+  el.textContent = msg;
+  el.classList.add('show');
   clearTimeout(hintTimer);
-  hintTimer=setTimeout(()=>el.classList.remove('show'),2200);
+  hintTimer = setTimeout(()=>el.classList.remove('show'), 2400);
 }
 
-// ── LEGEND ────────────────────────────────────────────────────────────
+// ── LEGEND ────────────────────────────────────────────────────────────────
 function renderLegend(f){
-  const el=document.getElementById('legend'); if(!f.legend){el.innerHTML='';return;}
-  el.innerHTML=f.legend.map(l=>`<div class="leg-item"><div class="leg-dot" style="background:${l.color}"></div><span>${l.label}</span></div>`).join('');
+  const el = document.getElementById('legend');
+  if(!f.legend){ el.innerHTML=''; return; }
+  el.innerHTML = f.legend.map(l=>`
+    <div class="leg-item">
+      <div class="leg-dot" style="background:${l.color}; box-shadow:0 0 5px ${l.color}66"></div>
+      <span>${l.label}</span>
+    </div>`).join('');
 }
 
-// ── MINIMAP ───────────────────────────────────────────────────────────
+// ── MINIMAP ───────────────────────────────────────────────────────────────
 function renderMinimap(){
-  const f=flows[activeFlowId]; if(!f) return;
-  const cv=document.getElementById('minimap');
-  const ctx=cv.getContext('2d');
+  const f = flows[activeFlowId];
+  if(!f) return;
+  const cv  = document.getElementById('minimap');
+  const ctx = cv.getContext('2d');
   ctx.clearRect(0,0,120,80);
-  ctx.fillStyle='rgba(30,34,51,0.9)';
+  ctx.fillStyle = 'rgba(13,17,23,0.95)';
   ctx.fillRect(0,0,120,80);
   if(!f.nodes.length) return;
-  let minX=Infinity,minY=Infinity,maxX=0,maxY=0;
-  f.nodes.forEach(n=>{minX=Math.min(minX,n.x);minY=Math.min(minY,n.y);maxX=Math.max(maxX,n.x+196);maxY=Math.max(maxY,n.y+90);});
+  let minX=Infinity, minY=Infinity, maxX=0, maxY=0;
+  f.nodes.forEach(n=>{
+    minX=Math.min(minX,n.x); minY=Math.min(minY,n.y);
+    maxX=Math.max(maxX,n.x+200); maxY=Math.max(maxY,n.y+90);
+  });
   const sx=100/(maxX-minX||1), sy=60/(maxY-minY||1), s=Math.min(sx,sy);
   const ox=10, oy=10;
   f.nodes.forEach(n=>{
-    ctx.fillStyle=COLORS[n.color]||'#4a5570';
-    ctx.globalAlpha=0.7;
-    ctx.fillRect(ox+(n.x-minX)*s, oy+(n.y-minY)*s, 196*s, 90*s);
-    ctx.globalAlpha=1;
+    ctx.fillStyle = COLORS[n.color]||'#38476a';
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath();
+    ctx.roundRect(ox+(n.x-minX)*s, oy+(n.y-minY)*s, 200*s, 90*s, 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
   });
 }
 
-// ── FLOW CRUD ─────────────────────────────────────────────────────────
-function openNewFlow(){ document.getElementById('newFlowModal').classList.add('open'); setTimeout(()=>document.getElementById('mfName').focus(),50); }
+// ── FLOW CRUD ──────────────────────────────────────────────────────────────
+function openNewFlow(){
+  document.getElementById('newFlowModal').classList.add('open');
+  setTimeout(()=>document.getElementById('mfName').focus(), 50);
+}
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-
 function createFlow(){
   const name  = document.getElementById('mfName').value.trim();
   const owner = document.getElementById('mfOwner').value.trim()||'Zelesta Group';
   const color = document.getElementById('mfColor').value;
   if(!name) return;
-  const id='flow_'+Date.now();
-  flows[id]={
+  const id = 'flow_'+Date.now();
+  flows[id] = {
     id, name, owner, version:'v1.0', color,
     nodes:[
-      {id:'n1',x:60,y:200,color:'blue',title:'Trigger',label:'Start',desc:'Beginpunt van de workflow',footer:'trigger → start'},
-      {id:'n2',x:340,y:200,color:'green',title:'Output',label:'Afronden',desc:'Eindpunt van de workflow',footer:'done'}
+      {id:'n1',x:60, y:200,color:'blue', title:'Trigger',label:'Start',           desc:'Beginpunt van de workflow',footer:'trigger → start'},
+      {id:'n2',x:340,y:200,color:'green',title:'Output', label:'Afronden',         desc:'Eindpunt van de workflow', footer:'done'}
     ],
     edges:[{id:'e1',from:'n1',to:'n2',color:COLORS[color],label:''}],
     legend:[]
   };
   closeModal('newFlowModal');
-  document.getElementById('mfName').value='';
-  document.getElementById('mfOwner').value='';
+  document.getElementById('mfName').value  = '';
+  document.getElementById('mfOwner').value = '';
   saveAll();
   renderSidebar();
   loadFlow(id);
   showHint('Workflow aangemaakt');
 }
 
-// ── MOUSE EVENTS ───────────────────────────────────────────────────────
+// ── MOUSE EVENTS ───────────────────────────────────────────────────────────
 const wrap = document.getElementById('canvasWrap');
-
-wrap.addEventListener('mousedown',e=>{
-  if(e.target===wrap||e.target.id==='canvas'||e.target.classList.contains('grid-bg')){
+wrap.addEventListener('mousedown', e=>{
+  if(e.target===wrap || e.target.id==='canvas' || e.target.tagName==='svg' || e.target.id==='canvasHolder'){
     if(!drawingEdge){
-      panning={startX:e.clientX,startY:e.clientY,panX:pan.x,panY:pan.y};
+      panning = {startX:e.clientX, startY:e.clientY, panX:pan.x, panY:pan.y};
       document.getElementById('canvas').classList.add('panning');
     }
   }
 });
-
-window.addEventListener('mousemove',e=>{
-  mousePos={x:e.clientX,y:e.clientY};
-
+window.addEventListener('mousemove', e=>{
+  mousePos = {x:e.clientX, y:e.clientY};
   if(dragging){
-    const f=flows[activeFlowId]; if(!f) return;
-    const node=f.nodes.find(n=>n.id===dragging.nodeId); if(!node) return;
-    const wx=(e.clientX-pan.x)/zoom;
-    const wy=(e.clientY-pan.y)/zoom;
-    node.x=Math.round(wx-dragging.offX);
-    node.y=Math.round(wy-dragging.offY);
-    const el=document.getElementById('node-'+node.id);
-    if(el){el.style.left=node.x+'px';el.style.top=node.y+'px';}
+    const f = flows[activeFlowId];
+    if(!f) return;
+    const node = f.nodes.find(n=>n.id===dragging.nodeId);
+    if(!node) return;
+    const wx = (e.clientX-pan.x)/zoom;
+    const wy = (e.clientY-pan.y)/zoom;
+    node.x = Math.round(wx-dragging.offX);
+    node.y = Math.round(wy-dragging.offY);
+    const el = document.getElementById('node-'+node.id);
+    if(el){ el.style.left=node.x+'px'; el.style.top=node.y+'px'; }
     renderEdges();
     renderMinimap();
   }
-
   if(panning){
-    pan.x=panning.panX+(e.clientX-panning.startX);
-    pan.y=panning.panY+(e.clientY-panning.startY);
+    pan.x = panning.panX+(e.clientX-panning.startX);
+    pan.y = panning.panY+(e.clientY-panning.startY);
     applyTransform();
   }
-
   if(drawingEdge) renderEdges();
 });
-
-window.addEventListener('mouseup',e=>{
+window.addEventListener('mouseup', e=>{
   if(dragging){ dragging=null; saveAll(); }
   if(panning){ panning=null; document.getElementById('canvas').classList.remove('panning'); }
   if(drawingEdge){ drawingEdge=null; renderEdges(); }
 });
-
-wrap.addEventListener('wheel',e=>{
+wrap.addEventListener('wheel', e=>{
   e.preventDefault();
-  const delta=e.deltaY<0?0.1:-0.1;
-  const newZoom=Math.max(0.2,Math.min(2,zoom+delta));
-  const rect=wrap.getBoundingClientRect();
+  const delta    = e.deltaY<0 ? 0.1 : -0.1;
+  const newZoom  = Math.max(0.2, Math.min(2, zoom+delta));
+  const rect     = wrap.getBoundingClientRect();
   const mx=e.clientX-rect.left, my=e.clientY-rect.top;
-  pan.x=mx-(mx-pan.x)*(newZoom/zoom);
-  pan.y=my-(my-pan.y)*(newZoom/zoom);
-  zoom=newZoom;
+  pan.x = mx-(mx-pan.x)*(newZoom/zoom);
+  pan.y = my-(my-pan.y)*(newZoom/zoom);
+  zoom  = newZoom;
   applyTransform();
 },{passive:false});
 
-// Keyboard
-window.addEventListener('keydown',e=>{
+window.addEventListener('keydown', e=>{
   if(e.key==='Delete'||e.key==='Backspace'){
     if(document.activeElement.contentEditable==='true') return;
     if(selectedNodeId) deleteNode(selectedNodeId);
@@ -795,13 +1395,14 @@ window.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.key==='s'){ e.preventDefault(); saveAll(); }
   if(e.key==='Escape'){ closePanel(); drawingEdge=null; renderEdges(); }
 });
-
-// Click outside to deselect
-document.getElementById('canvas').addEventListener('click',e=>{
-  if(e.target.id==='canvas'){ selectedNodeId=null; document.querySelectorAll('.node').forEach(n=>n.classList.remove('selected')); }
+document.getElementById('canvas').addEventListener('click', e=>{
+  if(e.target.id==='canvas'){
+    selectedNodeId=null;
+    document.querySelectorAll('.node').forEach(n=>n.classList.remove('selected'));
+  }
 });
 
-// ── INIT ───────────────────────────────────────────────────────────────
+// ── INIT ────────────────────────────────────────────────────────────────────
 loadStorage();
 renderSidebar();
 const firstId = Object.keys(flows)[0];
