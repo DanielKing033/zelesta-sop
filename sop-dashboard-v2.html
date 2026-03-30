@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zelesta — SOP Workflows</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e1118; --s1:#161b27; --s2:#1c2235; --s3:#222840;
+  --b1:#2a3248; --b2:#3a4560; --b3:#4a5570;
+  --t1:#e2e8f8; --t2:#8892b0; --t3:#4a5570;
+  --acc:#5b7fff; --acc2:#7b9fff;
+  --blue:#3b7df8; --blue-bg:#142050; --blue-t:#93b8ff;
+  --amber:#e09020; --amber-bg:#3a2508; --amber-t:#fcd28a;
+  --teal:#0e9f8e; --teal-bg:#0a2e2a; --teal-t:#5ee8d4;
+  --pink:#c42070; --pink-bg:#38082a; --pink-t:#f9a8d4;
+  --green:#18a84a; --green-bg:#0b2e18; --green-t:#86efac;
+  --red:#e02020; --red-bg:#380808; --red-t:#fca5a5;
+  --gray:#4a5570; --gray-bg:#1c2235; --gray-t:#9ca3af;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);height:100vh;overflow:hidden;user-select:none}
+
+/* ── LAYOUT ── */
+.app{display:flex;height:100vh}
+.sidebar{width:210px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--b1);display:flex;flex-direction:column;z-index:10}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:48px;background:var(--s1);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0}
+
+/* ── SIDEBAR ── */
+.sb-logo{padding:16px 14px 12px;border-bottom:1px solid var(--b1)}
+.sb-logo-name{font-size:13px;font-weight:500;color:var(--t1)}
+.sb-logo-sub{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;margin-top:2px}
+.sb-section{padding:12px 10px 4px;font-size:9px;color:var(--t3);letter-spacing:.1em;text-transform:uppercase}
+.flow-list{flex:1;overflow-y:auto;padding:0 6px}
+.flow-item{padding:8px 8px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--t2);display:flex;align-items:center;gap:7px;margin-bottom:1px;transition:all .12s}
+.flow-item:hover{background:var(--s2);color:var(--t1)}
+.flow-item.active{background:var(--blue-bg);color:var(--blue-t)}
+.flow-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.flow-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.flow-count{font-size:9px;background:var(--s2);padding:1px 5px;border-radius:3px;color:var(--t3)}
+.btn-new{margin:6px;padding:8px 10px;background:transparent;border:1px dashed var(--b2);border-radius:7px;color:var(--t3);font-size:11px;cursor:pointer;transition:all .12s;font-family:'DM Sans',sans-serif;width:calc(100% - 12px)}
+.btn-new:hover{border-color:var(--acc);color:var(--acc2);background:var(--blue-bg)}
+
+/* ── TOPBAR ── */
+.tb-title{font-size:13px;font-weight:500;flex:1}
+.tb-meta{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace}
+.tb-btn{padding:5px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:5px;color:var(--t2);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s;white-space:nowrap}
+.tb-btn:hover{border-color:var(--b2);color:var(--t1);background:var(--s3)}
+.tb-btn.primary{background:var(--blue-bg);border-color:var(--blue);color:var(--blue-t)}
+.tb-btn.danger{background:var(--red-bg);border-color:var(--red);color:var(--red-t)}
+.tb-sep{width:1px;height:20px;background:var(--b1)}
+
+/* ── CANVAS ── */
+.canvas-wrap{flex:1;overflow:hidden;position:relative}
+.canvas{position:absolute;transform-origin:0 0;cursor:default}
+.canvas.panning{cursor:grabbing}
+.grid-bg{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,var(--b1) 1px,transparent 1px);background-size:24px 24px;opacity:.5}
+
+/* ── SVG EDGES ── */
+.edge-layer{position:absolute;top:0;left:0;overflow:visible;pointer-events:none}
+.edge-path{fill:none;stroke-width:1.8;stroke-opacity:.65;transition:stroke-opacity .15s}
+.edge-path:hover{stroke-opacity:1}
+.edge-label-bg{fill:var(--s1)}
+.edge-label-txt{font-family:'DM Mono',monospace;font-size:9px;fill:var(--t3)}
+.edge-drawing{fill:none;stroke:var(--acc);stroke-width:1.5;stroke-dasharray:5 3;pointer-events:none}
+
+/* ── NODE ── */
+.node{position:absolute;width:196px;background:var(--s1);border:1px solid var(--b1);border-radius:10px;overflow:visible;cursor:default;transition:border-color .12s,box-shadow .12s}
+.node:hover{border-color:var(--b2)}
+.node.selected{border-color:var(--acc);box-shadow:0 0 0 2px rgba(91,127,255,.2)}
+.node-header{padding:7px 11px 6px;font-size:10px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;gap:5px;border-radius:9px 9px 0 0;cursor:grab}
+.node-header:active{cursor:grabbing}
+.node-dot{width:5px;height:5px;border-radius:50%}
+.node-body{padding:9px 11px 10px;cursor:text}
+.node-label{font-size:12px;font-weight:500;line-height:1.3;margin-bottom:3px;outline:none;min-height:1em}
+.node-desc{font-size:10px;color:var(--t2);line-height:1.55;outline:none;min-height:1em}
+.node-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
+.node-footer{border-top:1px solid var(--b1);padding:5px 11px;font-size:9px;color:var(--t3);font-family:'DM Mono',monospace;cursor:text;outline:none}
+
+/* color variants */
+.nh-blue{background:var(--blue-bg);color:var(--blue-t)}.nd-blue{background:var(--blue-t)}
+.nh-amber{background:var(--amber-bg);color:var(--amber-t)}.nd-amber{background:var(--amber-t)}
+.nh-teal{background:var(--teal-bg);color:var(--teal-t)}.nd-teal{background:var(--teal-t)}
+.nh-pink{background:var(--pink-bg);color:var(--pink-t)}.nd-pink{background:var(--pink-t)}
+.nh-green{background:var(--green-bg);color:var(--green-t)}.nd-green{background:var(--green-t)}
+.nh-red{background:var(--red-bg);color:var(--red-t)}.nd-red{background:var(--red-t)}
+.nh-gray{background:var(--gray-bg);color:var(--gray-t)}.nd-gray{background:var(--gray-t)}
+
+/* PORT DOTS */
+.port{position:absolute;width:11px;height:11px;border-radius:50%;border:2px solid var(--bg);cursor:crosshair;z-index:5;transition:transform .1s}
+.port:hover{transform:scale(1.4)}
+.port-out{right:-6px}
+.port-in{left:-6px}
+.port-blue{background:var(--blue-t)}.port-amber{background:var(--amber-t)}
+.port-teal{background:var(--teal-t)}.port-pink{background:var(--pink-t)}
+.port-green{background:var(--green-t)}.port-red{background:var(--red-t)}
+.port-gray{background:var(--gray-t)}
+
+/* NODE TOOLBAR (appears on hover) */
+.node-toolbar{position:absolute;top:-30px;right:0;background:var(--s2);border:1px solid var(--b2);border-radius:6px;display:none;gap:1px;padding:3px;z-index:20}
+.node:hover .node-toolbar,.node.selected .node-toolbar{display:flex}
+.ntb-btn{width:22px;height:22px;border-radius:4px;border:none;background:transparent;color:var(--t2);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .1s}
+.ntb-btn:hover{background:var(--s3);color:var(--t1)}
+
+/* BADGE */
+.badge{font-size:9px;padding:2px 6px;border-radius:3px;font-weight:500}
+.badge-actie{background:var(--pink-bg);color:var(--pink-t)}
+.badge-warn{background:var(--red-bg);color:var(--red-t)}
+.badge-ok{background:var(--green-bg);color:var(--green-t)}
+.badge-info{background:var(--blue-bg);color:var(--blue-t)}
+
+/* ── PANELS ── */
+.panel{position:fixed;right:0;top:0;width:260px;height:100vh;background:var(--s1);border-left:1px solid var(--b1);padding:18px 16px;overflow-y:auto;transform:translateX(100%);transition:transform .18s;z-index:50}
+.panel.open{transform:none}
+.panel-close{float:right;cursor:pointer;color:var(--t3);font-size:16px;background:none;border:none;font-family:'DM Sans',sans-serif}
+.panel-title{font-size:13px;font-weight:500;margin-bottom:3px}
+.panel-sub{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;margin-bottom:16px}
+.field{margin-bottom:13px}
+.field label{font-size:9px;color:var(--t3);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.07em}
+.field input,.field select,.field textarea{width:100%;background:var(--bg);border:1px solid var(--b1);border-radius:5px;padding:6px 8px;color:var(--t1);font-size:11px;font-family:'DM Sans',sans-serif;resize:vertical}
+.field input:focus,.field select,.field textarea:focus{outline:none;border-color:var(--acc)}
+.field select{appearance:none;cursor:pointer}
+.color-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:4px}
+.color-swatch{width:100%;aspect-ratio:1;border-radius:4px;border:2px solid transparent;cursor:pointer;transition:all .1s}
+.color-swatch.active{border-color:#fff}
+.panel-btn{width:100%;padding:7px;background:var(--blue-bg);border:1px solid var(--blue);border-radius:5px;color:var(--blue-t);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:4px}
+.panel-btn:hover{background:var(--blue);color:#fff}
+.panel-btn.danger{background:var(--red-bg);border-color:var(--red);color:var(--red-t)}
+.panel-btn.danger:hover{background:var(--red)}
+
+/* ── MODALS ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--s2);border:1px solid var(--b2);border-radius:11px;padding:22px;width:320px}
+.modal h3{font-size:14px;font-weight:500;margin-bottom:14px}
+.modal input,.modal select{width:100%;background:var(--bg);border:1px solid var(--b1);border-radius:5px;padding:7px 9px;color:var(--t1);font-size:12px;font-family:'DM Sans',sans-serif;margin-bottom:8px}
+.modal input:focus,.modal select:focus{outline:none;border-color:var(--acc)}
+.modal-btns{display:flex;gap:7px;justify-content:flex-end;margin-top:8px}
+.mbtn{padding:7px 14px;border-radius:5px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--b1);background:transparent;color:var(--t2)}
+.mbtn:hover{background:var(--s3);color:var(--t1)}
+.mbtn.primary{background:var(--blue-bg);border-color:var(--blue);color:var(--blue-t)}
+.mbtn.primary:hover{background:var(--blue);color:#fff}
+
+/* ── LEGEND ── */
+.legend{position:absolute;bottom:16px;left:16px;background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:8px 12px;display:flex;gap:12px;flex-wrap:wrap;font-size:10px;color:var(--t3);pointer-events:none}
+.leg-item{display:flex;align-items:center;gap:5px}
+.leg-dot{width:7px;height:7px;border-radius:50%}
+
+/* ── MINIMAP ── */
+.minimap{position:absolute;bottom:16px;right:16px;background:var(--s1);border:1px solid var(--b1);border-radius:8px;overflow:hidden}
+.minimap canvas{display:block}
+
+/* ── EMPTY ── */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--t3);text-align:center;gap:8px}
+.empty h3{font-size:15px;font-weight:400}
+.empty p{font-size:11px}
+
+/* HINT */
+.hint{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--s2);border:1px solid var(--b1);border-radius:20px;padding:5px 14px;font-size:10px;color:var(--t3);pointer-events:none;opacity:0;transition:opacity .3s}
+.hint.show{opacity:1}
+
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-name">Zelesta Group</div>
+    <div class="sb-logo-sub">SOP Dashboard</div>
+  </div>
+  <div class="sb-section">Workflows</div>
+  <div class="flow-list" id="flowList"></div>
+  <button class="btn-new" onclick="openNewFlow()">＋ Nieuwe workflow</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title" id="tbTitle">—</div>
+    <div class="tb-meta" id="tbMeta"></div>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" onclick="addNode()">＋ Node</button>
+    <button class="tb-btn" onclick="toggleEditMode()" id="editBtn">✎ Bewerken</button>
+    <button class="tb-btn primary" onclick="saveAll()" title="Opslaan (Ctrl+S)">↓ Opslaan</button>
+    <button class="tb-btn" onclick="fitView()" title="Scherm passen">⊞ Fit</button>
+  </div>
+
+  <div class="canvas-wrap" id="canvasWrap">
+    <div id="emptyState" class="empty">
+      <h3>Selecteer een workflow</h3>
+      <p>Of maak er een aan via de sidebar</p>
+    </div>
+    <div id="canvasHolder" style="display:none;position:relative;width:100%;height:100%">
+      <div class="grid-bg"></div>
+      <div class="canvas" id="canvas">
+        <svg class="edge-layer" id="edgeSvg" style="position:absolute;top:0;left:0;width:4000px;height:4000px;overflow:visible"></svg>
+      </div>
+      <div class="hint" id="hint"></div>
+      <div class="legend" id="legend"></div>
+      <canvas class="minimap" id="minimap" width="120" height="80"></canvas>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- NODE PANEL -->
+<div class="panel" id="nodePanel">
+  <button class="panel-close" onclick="closePanel()">✕</button>
+  <div class="panel-title" id="panelTitle">Node</div>
+  <div class="panel-sub" id="panelSub"></div>
+  <div class="field"><label>Titel (header)</label><input id="pTitle" oninput="updateNodeField('title',this.value)"></div>
+  <div class="field"><label>Label</label><input id="pLabel" oninput="updateNodeField('label',this.value)"></div>
+  <div class="field"><label>Beschrijving</label><textarea id="pDesc" rows="3" oninput="updateNodeField('desc',this.value)"></textarea></div>
+  <div class="field"><label>Voetnoot</label><input id="pFooter" oninput="updateNodeField('footer',this.value)"></div>
+  <div class="field">
+    <label>Kleur</label>
+    <div class="color-grid" id="colorGrid"></div>
+  </div>
+  <button class="panel-btn danger" onclick="deleteSelectedNode()">🗑 Node verwijderen</button>
+</div>
+
+<!-- NEW FLOW MODAL -->
+<div class="modal-bg" id="newFlowModal">
+  <div class="modal">
+    <h3>Nieuwe workflow</h3>
+    <input type="text" id="mfName" placeholder="Naam (bijv. Producten toevoegen)">
+    <input type="text" id="mfOwner" placeholder="Eigenaar (bijv. Webshop team)">
+    <select id="mfColor">
+      <option value="blue">Blauw</option><option value="teal">Teal</option>
+      <option value="amber">Amber</option><option value="pink">Roze</option>
+      <option value="green">Groen</option>
+    </select>
+    <div class="modal-btns">
+      <button class="mbtn" onclick="closeModal('newFlowModal')">Annuleren</button>
+      <button class="mbtn primary" onclick="createFlow()">Aanmaken</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONSTANTS ──────────────────────────────────────────────────────────
+const COLORS = {
+  blue:'#3b7df8',amber:'#e09020',teal:'#0e9f8e',
+  pink:'#c42070',green:'#18a84a',red:'#e02020',gray:'#4a5570'
+};
+const COLOR_NAMES = Object.keys(COLORS);
+
+// ── STATE ──────────────────────────────────────────────────────────────
+let flows = {};
+let activeFlowId = null;
+let editMode = false;
+let selectedNodeId = null;
+let pan = {x:0,y:0};
+let zoom = 1;
+let dragging = null;   // {nodeId, offX, offY}
+let panning = null;    // {startX,startY,panX,panY}
+let drawingEdge = null; // {fromId, portY}
+let mousePos = {x:0,y:0};
+let nodeIdCounter = 1;
+let edgeIdCounter = 1;
+
+// ── INITIAL DATA ───────────────────────────────────────────────────────
+function makeId(prefix){ return prefix + '_' + (nodeIdCounter++); }
+
+const INIT_FLOW = {
+  id:'prijzen', name:'Prijzen aanpassen', owner:'Webshop Operations',
+  version:'v2.0', color:'blue',
+  nodes:[
+    {id:'n1',x:30,y:250,color:'blue',title:'Trigger',label:'Slack-bericht ontvangen',desc:'Van Dominique (Head of Marketing/Sales)',footer:'trigger → start'},
+    {id:'n2',x:290,y:110,color:'blue',title:'Route A',label:'Concreet bericht',desc:'Prijs staat in bericht → ga direct naar Shopify',footer:'skip opzoeken'},
+    {id:'n3',x:290,y:300,color:'amber',title:'Route B',label:'Signaal-bericht',desc:'Prijs klopt niet, geen nieuwe prijs vermeld',footer:'opzoeken vereist'},
+    {id:'n4',x:290,y:490,color:'pink',title:'Route C — Actie',label:'Actie-bericht',desc:'Product tijdelijk in actie, actieprijs instellen',footer:'vergelijkingsprijs nodig'},
+    {id:'n5',x:550,y:290,color:'amber',title:'Prijslijst B2C',label:'Google Sheet opzoeken',desc:'Sales Drive → kolom "Sales price NL/DE/FR" per maat',footer:'bron van waarheid'},
+    {id:'n6',x:550,y:490,color:'pink',title:'Actie instellen',label:'Basisprijs + Vergelijkingsprijs',desc:'Basisprijs = actieprijs. Vergelijkingsprijs = origineel.',footer:'einddatum noteren'},
+    {id:'n7',x:810,y:220,color:'teal',title:'Shopify Bulk Edit',label:'Producten selecteren & prijzen invullen',desc:'Admin → filter → Bulk bewerken. Elke kleur = apart product.',footer:'alle varianten'},
+    {id:'n8',x:810,y:420,color:'green',title:'Opslaan',label:'Controleren & opslaan',desc:'Visueel controleren vóór het opslaan',footer:'definitief'},
+    {id:'n9',x:810,y:590,color:'green',title:'Bevestiging',label:'Slack terugkoppeling',desc:'Zelfde thread: productnaam + varianten + nieuwe prijzen',footer:'output → done'},
+    {id:'n10',x:550,y:620,color:'pink',title:'Na de actie',label:'Prijzen terugzetten',desc:'Basisprijs → origineel. Vergelijkingsprijs leegmaken.',footer:'anders blijft actie zichtbaar'},
+    {id:'n11',x:30,y:530,color:'red',title:'Valkuilen',label:'Veelgemaakte fouten',desc:'Verkeerde markt · Niet alle varianten · Vergelijkingsprijs vergeten · Originele prijs niet genoteerd',footer:'altijd controleren'}
+  ],
+  edges:[
+    {id:'e1',from:'n1',to:'n2',color:'#3b7df8',label:'prijs bekend'},
+    {id:'e2',from:'n1',to:'n3',color:'#e09020',label:'geen prijs'},
+    {id:'e3',from:'n1',to:'n4',color:'#c42070',label:'actie'},
+    {id:'e4',from:'n3',to:'n5',color:'#e09020',label:''},
+    {id:'e5',from:'n4',to:'n6',color:'#c42070',label:''},
+    {id:'e6',from:'n2',to:'n7',color:'#3b7df8',label:''},
+    {id:'e7',from:'n5',to:'n7',color:'#e09020',label:''},
+    {id:'e8',from:'n6',to:'n7',color:'#c42070',label:''},
+    {id:'e9',from:'n7',to:'n8',color:'#0e9f8e',label:''},
+    {id:'e10',from:'n8',to:'n9',color:'#18a84a',label:''},
+    {id:'e11',from:'n6',to:'n10',color:'#c42070',label:'na einddatum'},
+    {id:'e12',from:'n10',to:'n9',color:'#c42070',label:''}
+  ],
+  legend:[
+    {color:'#3b7df8',label:'Normale prijs'},{color:'#e09020',label:'Prijs opzoeken'},
+    {color:'#c42070',label:'Actieprijs'},{color:'#0e9f8e',label:'Shopify'},
+    {color:'#18a84a',label:'Afronden'},{color:'#e02020',label:'Waarschuwing'}
+  ]
+};
+
+// ── STORAGE ────────────────────────────────────────────────────────────
+function saveAll(){
+  try{ localStorage.setItem('zelesta_flows', JSON.stringify(flows)); }catch(e){}
+  showHint('Opgeslagen ✓');
+}
+function loadStorage(){
+  try{
+    const d = localStorage.getItem('zelesta_flows');
+    if(d) flows = JSON.parse(d);
+  }catch(e){}
+  if(!Object.keys(flows).length) flows = {prijzen: JSON.parse(JSON.stringify(INIT_FLOW))};
+}
+
+// ── SIDEBAR ────────────────────────────────────────────────────────────
+function renderSidebar(){
+  const el = document.getElementById('flowList');
+  el.innerHTML = '';
+  Object.values(flows).forEach(f=>{
+    const d = document.createElement('div');
+    d.className = 'flow-item' + (f.id===activeFlowId?' active':'');
+    d.innerHTML = `<div class="flow-dot" style="background:${COLORS[f.color]||COLORS.blue}"></div>
+      <span class="flow-name">${f.name}</span>
+      <span class="flow-count">${(f.nodes||[]).length}</span>`;
+    d.onclick = ()=>loadFlow(f.id);
+    el.appendChild(d);
+  });
+}
+
+// ── LOAD FLOW ──────────────────────────────────────────────────────────
+function loadFlow(id){
+  const f = flows[id]; if(!f) return;
+  activeFlowId = id;
+  renderSidebar();
+  document.getElementById('emptyState').style.display='none';
+  document.getElementById('canvasHolder').style.display='block';
+  document.getElementById('tbTitle').textContent = f.name;
+  document.getElementById('tbMeta').textContent = `${f.owner} · ${f.version||'v1.0'}`;
+  renderLegend(f);
+  renderGraph();
+  fitView();
+}
+
+// ── RENDER GRAPH ───────────────────────────────────────────────────────
+function renderGraph(){
+  const f = flows[activeFlowId]; if(!f) return;
+  const canvas = document.getElementById('canvas');
+  // Remove old nodes
+  Array.from(canvas.querySelectorAll('.node')).forEach(n=>n.remove());
+  // Render nodes
+  f.nodes.forEach(n => createNodeEl(n));
+  renderEdges();
+  renderMinimap();
+}
+
+function createNodeEl(n){
+  const canvas = document.getElementById('canvas');
+  const el = document.createElement('div');
+  el.className = 'node';
+  el.id = 'node-'+n.id;
+  el.style.left = n.x+'px';
+  el.style.top  = n.y+'px';
+
+  el.innerHTML = `
+    <div class="node-toolbar">
+      <button class="ntb-btn" title="Bewerken" onclick="openNodePanel('${n.id}')">✎</button>
+      <button class="ntb-btn" title="Dupliceren" onclick="duplicateNode('${n.id}')">⧉</button>
+      <button class="ntb-btn" title="Verwijderen" onclick="deleteNode('${n.id}')">✕</button>
+    </div>
+    <div class="node-header nh-${n.color}" id="nh-${n.id}">
+      <div class="node-dot nd-${n.color}"></div>
+      <span contenteditable="false" id="nt-${n.id}" onblur="fieldBlur('${n.id}','title',this.textContent)">${n.title||''}</span>
+    </div>
+    <div class="node-body">
+      <div class="node-label" contenteditable="false" id="nl-${n.id}" onblur="fieldBlur('${n.id}','label',this.textContent)">${n.label||''}</div>
+      <div class="node-desc" contenteditable="false" id="nd-${n.id}" onblur="fieldBlur('${n.id}','desc',this.textContent)">${n.desc||''}</div>
+    </div>
+    ${n.footer?`<div class="node-footer" contenteditable="false" id="nf-${n.id}" onblur="fieldBlur('${n.id}','footer',this.textContent)">${n.footer}</div>`:''}
+    <div class="port port-out port-${n.color}" id="po-${n.id}" style="top:calc(50% - 5.5px)" title="Sleep om te verbinden"></div>
+    <div class="port port-in  port-${n.color}" id="pi-${n.id}" style="top:calc(50% - 5.5px)"></div>
+  `;
+
+  // Drag node via header
+  const header = el.querySelector('.node-header');
+  header.addEventListener('mousedown', e=>{
+    if(e.target.closest('.ntb-btn')) return;
+    if(drawingEdge) return;
+    e.preventDefault();
+    selectNode(n.id);
+    const rect = el.getBoundingClientRect();
+    const wx = (e.clientX - pan.x) / zoom;
+    const wy = (e.clientY - pan.y) / zoom;
+    dragging = { nodeId:n.id, offX: wx-n.x, offY: wy-n.y };
+  });
+
+  // Start edge drawing from out-port
+  const portOut = el.querySelector('.port-out');
+  portOut.addEventListener('mousedown', e=>{
+    e.stopPropagation();
+    e.preventDefault();
+    const rect = el.getBoundingClientRect();
+    drawingEdge = { fromId:n.id };
+  });
+
+  // Connect edge to in-port
+  const portIn = el.querySelector('.port-in');
+  portIn.addEventListener('mouseup', e=>{
+    e.stopPropagation();
+    if(drawingEdge && drawingEdge.fromId !== n.id){
+      addEdge(drawingEdge.fromId, n.id);
+    }
+    drawingEdge = null;
+    renderEdges();
+  });
+
+  // Click to select
+  el.addEventListener('click', e=>{
+    if(e.target.closest('.ntb-btn')) return;
+    selectNode(n.id);
+  });
+
+  canvas.appendChild(el);
+}
+
+// ── SELECT ─────────────────────────────────────────────────────────────
+function selectNode(id){
+  selectedNodeId = id;
+  document.querySelectorAll('.node').forEach(n=>n.classList.remove('selected'));
+  const el = document.getElementById('node-'+id);
+  if(el) el.classList.add('selected');
+}
+
+// ── EDGES ──────────────────────────────────────────────────────────────
+function renderEdges(){
+  const f = flows[activeFlowId]; if(!f) return;
+  const svg = document.getElementById('edgeSvg');
+  svg.innerHTML = `<defs>
+    <marker id="arr" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+      <polygon points="0 0, 7 2.5, 0 5" fill="#4a5570"/>
+    </marker>
+    <marker id="arr-drawing" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+      <polygon points="0 0, 7 2.5, 0 5" fill="${'#5b7fff'}"/>
+    </marker>
+  </defs>`;
+
+  (f.edges||[]).forEach(e=>{
+    const fromEl = document.getElementById('node-'+e.from);
+    const toEl   = document.getElementById('node-'+e.to);
+    if(!fromEl||!toEl) return;
+
+    const fx = parseFloat(fromEl.style.left)+196;
+    const fy = parseFloat(fromEl.style.top) + fromEl.offsetHeight/2;
+    const tx = parseFloat(toEl.style.left);
+    const ty = parseFloat(toEl.style.top) + toEl.offsetHeight/2;
+    const cx = Math.abs(tx-fx)*0.5;
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('class','edge-path');
+    path.setAttribute('d',`M${fx},${fy} C${fx+cx},${fy} ${tx-cx},${ty} ${tx},${ty}`);
+    path.setAttribute('stroke', e.color||'#4a5570');
+    path.setAttribute('marker-end','url(#arr)');
+    path.style.cursor='pointer';
+    path.addEventListener('click',()=>{ if(confirm('Edge verwijderen?')) deleteEdge(e.id); });
+    svg.appendChild(path);
+
+    if(e.label){
+      const mx=(fx+tx)/2, my=(fy+ty)/2-6;
+      const bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      bg.setAttribute('x',mx-e.label.length*3); bg.setAttribute('y',my-9);
+      bg.setAttribute('width',e.label.length*6+6); bg.setAttribute('height',13);
+      bg.setAttribute('rx','3'); bg.setAttribute('class','edge-label-bg');
+      svg.appendChild(bg);
+      const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+      txt.setAttribute('x',mx); txt.setAttribute('y',my);
+      txt.setAttribute('text-anchor','middle'); txt.setAttribute('class','edge-label-txt');
+      txt.setAttribute('dominant-baseline','central');
+      txt.textContent = e.label;
+      svg.appendChild(txt);
+    }
+  });
+
+  // Live drawing edge
+  if(drawingEdge){
+    const fromEl = document.getElementById('node-'+drawingEdge.fromId);
+    if(fromEl){
+      const fx = parseFloat(fromEl.style.left)+196;
+      const fy = parseFloat(fromEl.style.top)+fromEl.offsetHeight/2;
+      const mx = (mousePos.x - pan.x)/zoom;
+      const my = (mousePos.y - pan.y)/zoom;
+      const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+      p.setAttribute('class','edge-drawing');
+      p.setAttribute('d',`M${fx},${fy} C${fx+60},${fy} ${mx-60},${my} ${mx},${my}`);
+      p.setAttribute('marker-end','url(#arr-drawing)');
+      svg.appendChild(p);
+    }
+  }
+}
+
+function addEdge(fromId, toId){
+  const f = flows[activeFlowId]; if(!f) return;
+  const fromNode = f.nodes.find(n=>n.id===fromId);
+  const color = COLORS[fromNode?.color]||'#4a5570';
+  f.edges = f.edges||[];
+  const id = 'e'+edgeIdCounter++;
+  f.edges.push({id, from:fromId, to:toId, color, label:''});
+  saveAll();
+}
+
+function deleteEdge(id){
+  const f = flows[activeFlowId]; if(!f) return;
+  f.edges = f.edges.filter(e=>e.id!==id);
+  renderEdges();
+  saveAll();
+}
+
+// ── NODE CRUD ──────────────────────────────────────────────────────────
+function addNode(){
+  const f = flows[activeFlowId]; if(!f) return;
+  const id = makeId('n');
+  const cx = (-pan.x/zoom) + 200;
+  const cy = (-pan.y/zoom) + 150;
+  const node = {id, x:cx, y:cy, color:'gray', title:'Nieuwe node', label:'Label', desc:'Beschrijving', footer:''};
+  f.nodes.push(node);
+  createNodeEl(node);
+  renderEdges();
+  selectNode(id);
+  openNodePanel(id);
+  saveAll();
+  showHint('Node toegevoegd');
+}
+
+function duplicateNode(id){
+  const f = flows[activeFlowId]; if(!f) return;
+  const src = f.nodes.find(n=>n.id===id); if(!src) return;
+  const newId = makeId('n');
+  const node = {...src, id:newId, x:src.x+220, y:src.y+20};
+  f.nodes.push(node);
+  createNodeEl(node);
+  renderEdges();
+  selectNode(newId);
+  saveAll();
+}
+
+function deleteNode(id){
+  const f = flows[activeFlowId]; if(!f) return;
+  f.nodes = f.nodes.filter(n=>n.id!==id);
+  f.edges = (f.edges||[]).filter(e=>e.from!==id&&e.to!==id);
+  document.getElementById('node-'+id)?.remove();
+  renderEdges();
+  if(selectedNodeId===id){ selectedNodeId=null; closePanel(); }
+  saveAll();
+}
+
+function deleteSelectedNode(){
+  if(selectedNodeId) deleteNode(selectedNodeId);
+}
+
+function fieldBlur(nodeId, field, value){
+  const f = flows[activeFlowId]; if(!f) return;
+  const node = f.nodes.find(n=>n.id===nodeId); if(!node) return;
+  node[field] = value.trim();
+  saveAll();
+}
+
+// ── NODE PANEL ─────────────────────────────────────────────────────────
+function openNodePanel(id){
+  const f = flows[activeFlowId]; if(!f) return;
+  const node = f.nodes.find(n=>n.id===id); if(!node) return;
+  selectedNodeId = id;
+  selectNode(id);
+  document.getElementById('panelTitle').textContent = node.label||node.title||'Node';
+  document.getElementById('panelSub').textContent = 'id: '+id;
+  document.getElementById('pTitle').value  = node.title||'';
+  document.getElementById('pLabel').value  = node.label||'';
+  document.getElementById('pDesc').value   = node.desc||'';
+  document.getElementById('pFooter').value = node.footer||'';
+
+  // Color swatches
+  const grid = document.getElementById('colorGrid');
+  grid.innerHTML='';
+  COLOR_NAMES.forEach(c=>{
+    const sw = document.createElement('div');
+    sw.className='color-swatch'+(node.color===c?' active':'');
+    sw.style.background=COLORS[c];
+    sw.onclick=()=>{ updateNodeColor(id,c); grid.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active')); sw.classList.add('active'); };
+    grid.appendChild(sw);
+  });
+
+  document.getElementById('nodePanel').classList.add('open');
+}
+
+function closePanel(){ document.getElementById('nodePanel').classList.remove('open'); }
+
+function updateNodeField(field, value){
+  if(!selectedNodeId) return;
+  const f = flows[activeFlowId]; if(!f) return;
+  const node = f.nodes.find(n=>n.id===selectedNodeId); if(!node) return;
+  node[field] = value;
+  // Live update DOM
+  const map = {title:'nt-',label:'nl-',desc:'nd-',footer:'nf-'};
+  const el = document.getElementById((map[field]||'') + selectedNodeId);
+  if(el) el.textContent = value;
+  saveAll();
+}
+
+function updateNodeColor(id, color){
+  const f = flows[activeFlowId]; if(!f) return;
+  const node = f.nodes.find(n=>n.id===id); if(!node) return;
+  node.color = color;
+  // Update DOM classes
+  const el = document.getElementById('node-'+id); if(!el) return;
+  const header = el.querySelector('.node-header');
+  const dot = el.querySelector('.node-dot');
+  const portOut = el.querySelector('.port-out');
+  const portIn  = el.querySelector('.port-in');
+  header.className = 'node-header nh-'+color;
+  dot.className = 'node-dot nd-'+color;
+  portOut.className = 'port port-out port-'+color;
+  portIn.className  = 'port port-in port-'+color;
+  // Update edges color
+  (f.edges||[]).forEach(e=>{ if(e.from===id) e.color=COLORS[color]||e.color; });
+  renderEdges();
+  saveAll();
+}
+
+// ── EDIT MODE ──────────────────────────────────────────────────────────
+function toggleEditMode(){
+  editMode = !editMode;
+  const btn = document.getElementById('editBtn');
+  btn.textContent = editMode ? '✓ Klaar' : '✎ Bewerken';
+  btn.style.background = editMode ? 'var(--teal-bg)' : '';
+  btn.style.borderColor = editMode ? 'var(--teal)' : '';
+  btn.style.color = editMode ? 'var(--teal-t)' : '';
+
+  document.querySelectorAll('.node-label,.node-desc,.node-footer,[id^="nt-"]').forEach(el=>{
+    el.contentEditable = editMode ? 'true' : 'false';
+  });
+  showHint(editMode ? 'Bewerkmodus aan — klik op tekst om te editen' : 'Bewerkmodus uit');
+}
+
+// ── PAN & ZOOM ─────────────────────────────────────────────────────────
+function applyTransform(){
+  document.getElementById('canvas').style.transform = `translate(${pan.x}px,${pan.y}px) scale(${zoom})`;
+}
+
+function fitView(){
+  const f = flows[activeFlowId]; if(!f||!f.nodes.length) return;
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  f.nodes.forEach(n=>{
+    minX=Math.min(minX,n.x); minY=Math.min(minY,n.y);
+    maxX=Math.max(maxX,n.x+200); maxY=Math.max(maxY,n.y+120);
+  });
+  const wrap = document.getElementById('canvasWrap');
+  const pw=wrap.clientWidth-80, ph=wrap.clientHeight-80;
+  const fw=maxX-minX, fh=maxY-minY;
+  zoom = Math.min(pw/fw, ph/fh, 1.2);
+  pan.x = (pw-fw*zoom)/2 + 40 - minX*zoom;
+  pan.y = (ph-fh*zoom)/2 + 40 - minY*zoom;
+  applyTransform();
+}
+
+// ── HINT ───────────────────────────────────────────────────────────────
+let hintTimer;
+function showHint(msg){
+  const el = document.getElementById('hint');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(hintTimer);
+  hintTimer=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+// ── LEGEND ────────────────────────────────────────────────────────────
+function renderLegend(f){
+  const el=document.getElementById('legend'); if(!f.legend){el.innerHTML='';return;}
+  el.innerHTML=f.legend.map(l=>`<div class="leg-item"><div class="leg-dot" style="background:${l.color}"></div><span>${l.label}</span></div>`).join('');
+}
+
+// ── MINIMAP ───────────────────────────────────────────────────────────
+function renderMinimap(){
+  const f=flows[activeFlowId]; if(!f) return;
+  const cv=document.getElementById('minimap');
+  const ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,120,80);
+  ctx.fillStyle='rgba(30,34,51,0.9)';
+  ctx.fillRect(0,0,120,80);
+  if(!f.nodes.length) return;
+  let minX=Infinity,minY=Infinity,maxX=0,maxY=0;
+  f.nodes.forEach(n=>{minX=Math.min(minX,n.x);minY=Math.min(minY,n.y);maxX=Math.max(maxX,n.x+196);maxY=Math.max(maxY,n.y+90);});
+  const sx=100/(maxX-minX||1), sy=60/(maxY-minY||1), s=Math.min(sx,sy);
+  const ox=10, oy=10;
+  f.nodes.forEach(n=>{
+    ctx.fillStyle=COLORS[n.color]||'#4a5570';
+    ctx.globalAlpha=0.7;
+    ctx.fillRect(ox+(n.x-minX)*s, oy+(n.y-minY)*s, 196*s, 90*s);
+    ctx.globalAlpha=1;
+  });
+}
+
+// ── FLOW CRUD ─────────────────────────────────────────────────────────
+function openNewFlow(){ document.getElementById('newFlowModal').classList.add('open'); setTimeout(()=>document.getElementById('mfName').focus(),50); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+function createFlow(){
+  const name  = document.getElementById('mfName').value.trim();
+  const owner = document.getElementById('mfOwner').value.trim()||'Zelesta Group';
+  const color = document.getElementById('mfColor').value;
+  if(!name) return;
+  const id='flow_'+Date.now();
+  flows[id]={
+    id, name, owner, version:'v1.0', color,
+    nodes:[
+      {id:'n1',x:60,y:200,color:'blue',title:'Trigger',label:'Start',desc:'Beginpunt van de workflow',footer:'trigger → start'},
+      {id:'n2',x:340,y:200,color:'green',title:'Output',label:'Afronden',desc:'Eindpunt van de workflow',footer:'done'}
+    ],
+    edges:[{id:'e1',from:'n1',to:'n2',color:COLORS[color],label:''}],
+    legend:[]
+  };
+  closeModal('newFlowModal');
+  document.getElementById('mfName').value='';
+  document.getElementById('mfOwner').value='';
+  saveAll();
+  renderSidebar();
+  loadFlow(id);
+  showHint('Workflow aangemaakt');
+}
+
+// ── MOUSE EVENTS ───────────────────────────────────────────────────────
+const wrap = document.getElementById('canvasWrap');
+
+wrap.addEventListener('mousedown',e=>{
+  if(e.target===wrap||e.target.id==='canvas'||e.target.classList.contains('grid-bg')){
+    if(!drawingEdge){
+      panning={startX:e.clientX,startY:e.clientY,panX:pan.x,panY:pan.y};
+      document.getElementById('canvas').classList.add('panning');
+    }
+  }
+});
+
+window.addEventListener('mousemove',e=>{
+  mousePos={x:e.clientX,y:e.clientY};
+
+  if(dragging){
+    const f=flows[activeFlowId]; if(!f) return;
+    const node=f.nodes.find(n=>n.id===dragging.nodeId); if(!node) return;
+    const wx=(e.clientX-pan.x)/zoom;
+    const wy=(e.clientY-pan.y)/zoom;
+    node.x=Math.round(wx-dragging.offX);
+    node.y=Math.round(wy-dragging.offY);
+    const el=document.getElementById('node-'+node.id);
+    if(el){el.style.left=node.x+'px';el.style.top=node.y+'px';}
+    renderEdges();
+    renderMinimap();
+  }
+
+  if(panning){
+    pan.x=panning.panX+(e.clientX-panning.startX);
+    pan.y=panning.panY+(e.clientY-panning.startY);
+    applyTransform();
+  }
+
+  if(drawingEdge) renderEdges();
+});
+
+window.addEventListener('mouseup',e=>{
+  if(dragging){ dragging=null; saveAll(); }
+  if(panning){ panning=null; document.getElementById('canvas').classList.remove('panning'); }
+  if(drawingEdge){ drawingEdge=null; renderEdges(); }
+});
+
+wrap.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const delta=e.deltaY<0?0.1:-0.1;
+  const newZoom=Math.max(0.2,Math.min(2,zoom+delta));
+  const rect=wrap.getBoundingClientRect();
+  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  pan.x=mx-(mx-pan.x)*(newZoom/zoom);
+  pan.y=my-(my-pan.y)*(newZoom/zoom);
+  zoom=newZoom;
+  applyTransform();
+},{passive:false});
+
+// Keyboard
+window.addEventListener('keydown',e=>{
+  if(e.key==='Delete'||e.key==='Backspace'){
+    if(document.activeElement.contentEditable==='true') return;
+    if(selectedNodeId) deleteNode(selectedNodeId);
+  }
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){ e.preventDefault(); saveAll(); }
+  if(e.key==='Escape'){ closePanel(); drawingEdge=null; renderEdges(); }
+});
+
+// Click outside to deselect
+document.getElementById('canvas').addEventListener('click',e=>{
+  if(e.target.id==='canvas'){ selectedNodeId=null; document.querySelectorAll('.node').forEach(n=>n.classList.remove('selected')); }
+});
+
+// ── INIT ───────────────────────────────────────────────────────────────
+loadStorage();
+renderSidebar();
+const firstId = Object.keys(flows)[0];
+if(firstId) loadFlow(firstId);
+</script>
+</body>
+</html>
