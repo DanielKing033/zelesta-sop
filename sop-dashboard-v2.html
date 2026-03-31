@@ -1637,13 +1637,17 @@ window.addEventListener('mouseup', e=>{
   if(dragging){ dragging=null; saveAll(); }
   if(panning){ panning=null; document.getElementById('canvas').classList.remove('panning'); }
   if(drawingEdge){
-    // Find which node is under the cursor using elementsFromPoint
-    const els = document.elementsFromPoint(e.clientX, e.clientY);
-    const targetNode = els.find(el => el.classList.contains('node') && el.id !== 'node-'+drawingEdge.fromId);
-    if(targetNode){
-      const toId = targetNode.id.replace('node-','');
-      addEdge(drawingEdge.fromId, toId);
-    }
+    // Find which node the cursor is over using screen bounding rects
+    let targetId = null;
+    document.querySelectorAll('.node').forEach(nodeEl => {
+      if(nodeEl.id === 'node-'+drawingEdge.fromId) return;
+      const r = nodeEl.getBoundingClientRect();
+      if(e.clientX >= r.left && e.clientX <= r.right &&
+         e.clientY >= r.top  && e.clientY <= r.bottom){
+        targetId = nodeEl.id.replace('node-','');
+      }
+    });
+    if(targetId) addEdge(drawingEdge.fromId, targetId);
     drawingEdge = null;
     document.getElementById('canvas').classList.remove('drawing-edge');
     document.querySelectorAll('.edge-source').forEach(el=>el.classList.remove('edge-source'));
