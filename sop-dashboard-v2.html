@@ -423,16 +423,17 @@ body {
 .port-out { right: -7px; }
 .port-in  { left:  -7px; pointer-events: none; }
 
-/* During edge drawing: highlight all port-in targets */
+/* During edge drawing */
+.drawing-edge { cursor: crosshair !important; }
+.drawing-edge .node { cursor: crosshair !important; }
 .drawing-edge .port-in {
-  pointer-events: all;
-  transform: scale(1.6);
-  box-shadow: 0 0 10px var(--acc);
+  transform: scale(1.8);
+  box-shadow: 0 0 12px var(--acc);
+  background: var(--acc) !important;
 }
-.drawing-edge .node:not(.edge-source):hover {
-  border-color: var(--acc);
-  box-shadow: 0 0 0 2px var(--acc-glow), var(--shadow-lg);
-  cursor: crosshair;
+.edge-target-hover {
+  border-color: var(--acc) !important;
+  box-shadow: 0 0 0 3px var(--acc-glow), var(--shadow-lg) !important;
 }
 /* Port color variants */
 .port-blue  { background: var(--blue-t);  border-color: var(--blue-bg); }
@@ -1335,11 +1336,14 @@ function renderEdges(){
     if(fromEl){
       const fx = parseFloat(fromEl.style.left) + 200;
       const fy = parseFloat(fromEl.style.top)  + fromEl.offsetHeight/2;
-      const mx = (mousePos.x - pan.x)/zoom;
-      const my = (mousePos.y - pan.y)/zoom;
+      // Correct: subtract canvasWrap offset so coordinates match canvas space
+      const wr = document.getElementById('canvasWrap').getBoundingClientRect();
+      const mx = (mousePos.x - wr.left - pan.x) / zoom;
+      const my = (mousePos.y - wr.top  - pan.y) / zoom;
+      const cx = Math.max(Math.abs(mx-fx)*0.45, 60);
       const p  = document.createElementNS('http://www.w3.org/2000/svg','path');
       p.setAttribute('class','edge-drawing');
-      p.setAttribute('d',`M${fx},${fy} C${fx+60},${fy} ${mx-60},${my} ${mx},${my}`);
+      p.setAttribute('d',`M${fx},${fy} C${fx+cx},${fy} ${mx-cx},${my} ${mx},${my}`);
       p.setAttribute('marker-end','url(#arr-drawing)');
       svg.appendChild(p);
     }
@@ -1631,7 +1635,17 @@ window.addEventListener('mousemove', e=>{
     pan.y = panning.panY+(e.clientY-panning.startY);
     applyTransform();
   }
-  if(drawingEdge) renderEdges();
+  if(drawingEdge){
+    renderEdges();
+    // Highlight which node the cursor is over as drop target
+    document.querySelectorAll('.node').forEach(nodeEl => {
+      if(nodeEl.id === 'node-'+drawingEdge.fromId){ return; }
+      const r = nodeEl.getBoundingClientRect();
+      const over = e.clientX >= r.left && e.clientX <= r.right &&
+                   e.clientY >= r.top  && e.clientY <= r.bottom;
+      nodeEl.classList.toggle('edge-target-hover', over);
+    });
+  }
 });
 window.addEventListener('mouseup', e=>{
   if(dragging){ dragging=null; saveAll(); }
@@ -1650,7 +1664,9 @@ window.addEventListener('mouseup', e=>{
     if(targetId) addEdge(drawingEdge.fromId, targetId);
     drawingEdge = null;
     document.getElementById('canvas').classList.remove('drawing-edge');
-    document.querySelectorAll('.edge-source').forEach(el=>el.classList.remove('edge-source'));
+    document.querySelectorAll('.edge-source,.edge-target-hover').forEach(el=>{
+      el.classList.remove('edge-source','edge-target-hover');
+    });
     renderEdges();
   }
 });
