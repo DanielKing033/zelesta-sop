@@ -1152,6 +1152,45 @@ const INIT_FLOW = {
   ]
 };
 
+const INIT_FLOW_2 = {
+  id:'product-aanmaken', name:'Product aanmaken', owner:'Webshop Operations', version:'v1.0', color:'green',
+  nodes:[
+    {id:'n1',  x:40,   y:280, color:'blue',  title:'Trigger',          label:'Email ontvangen',          desc:'Van Head of Sales of Supply — aanvraag voor nieuw product met productnaam en kleurvariant', footer:'trigger → start'},
+    {id:'n2',  x:300,  y:140, color:'amber', title:'Databron A',        label:'Google Sheet openen',      desc:'Sheet van Supply: SKU, EAN/barcode, inkoopprijs, leverancier, tijk voorzijde, tijk achterzijde, vulling, materiaal, warmteklasse, wasmachine formaat, wasinstructies, droger, instopstrook, brandveilig, gewicht product kg, temperatuur regulerend', footer:'supply → sheet'},
+    {id:'n3',  x:300,  y:360, color:'amber', title:'Databron B',        label:'Email raadplegen',         desc:'Van Head of Sales / Head of Category: verkoopprijs en compare at price per maat', footer:'sales → prijs'},
+    {id:'n4',  x:300,  y:520, color:'amber', title:'Databron C',        label:'Afbeeldingen ontvangen',   desc:'Leverancier stuurt productfoto\'s op via email of WeTransfer — lokaal opslaan en klaarzetten voor upload', footer:'leverancier → media'},
+    {id:'n5',  x:600,  y:240, color:'teal',  title:'Shopify — Stap 1',  label:'Product aanmaken',         desc:'Nieuw product openen in Shopify Admin. Titel: Zelesta [Naam uit sheet] - [Kleur]. Voorbeeld: Zelesta Special Seersucker Zomerdekbed - Amandelmelk Beige. Product type instellen (bijv. Dekbed). Vendor = leverancier uit sheet.', footer:'admin/products/new'},
+    {id:'n6',  x:600,  y:440, color:'teal',  title:'Shopify — Stap 2',  label:'Prijzen invullen',         desc:'Price = verkoopprijs (uit email). Compare at price (uit email). Cost per item = inkoopprijs (uit sheet).', footer:'email + sheet → prijs'},
+    {id:'n7',  x:900,  y:140, color:'teal',  title:'Shopify — Stap 3',  label:'Varianten aanmaken',       desc:'4 vaste maatvarianten: 140x200 cm (S), 160x220 cm (M), 200x200 cm (L), 240x200 cm (XL). Per variant eigen SKU + EAN/barcode invullen vanuit sheet.', footer:'sheet → SKU + EAN'},
+    {id:'n8',  x:900,  y:400, color:'teal',  title:'Shopify — Stap 4',  label:'Afbeeldingen uploaden',    desc:'Productfoto\'s van leverancier uploaden. Hero-afbeelding als eerste instellen. Overige foto\'s op de juiste volgorde plaatsen.', footer:'leverancier → media upload'},
+    {id:'n9',  x:1180, y:280, color:'pink',  title:'Shopify — Stap 5',  label:'Specificaties metafield',  desc:'Metafield Specificaties invullen met zl-spec-grid HTML. Waarden uit sheet: materiaal, tijk voor/achterzijde, vulling, warmteklasse, beschikbare maten, instopstrook, wasvoorschrift, droger, wasmachinecapaciteit per maat, temperatuurregulerend, brandveilig, gewicht. Garantie altijd 1 jaar.', footer:'sheet → HTML metafield'},
+    {id:'n10', x:1460, y:140, color:'pink',  title:'Shopify — Stap 6',  label:'SEO invullen',             desc:'SEO-titel = producttitel. Meta description: 155 tekens op basis van producttype en specificaties.', footer:'handmatig → SEO'},
+    {id:'n11', x:1460, y:420, color:'green', title:'Afronden',           label:'Opslaan als Draft',        desc:'Product opslaan als concept (Draft) — NIET publiceren. Controleer: titel correct, 4 varianten aangemaakt met SKU/EAN, metafield HTML aanwezig, prijzen kloppen. Smart collections vullen automatisch op basis van producttitel en producttype.', footer:'draft → klaar voor review'}
+  ],
+  edges:[
+    {id:'e1',  from:'n1',  to:'n2',  color:'#e8982a', label:'sheet openen'},
+    {id:'e2',  from:'n1',  to:'n3',  color:'#e8982a', label:'prijs ophalen'},
+    {id:'e3',  from:'n1',  to:'n4',  color:'#e8982a', label:'fotos verzamelen'},
+    {id:'e4',  from:'n2',  to:'n5',  color:'#e8982a', label:'basis data'},
+    {id:'e5',  from:'n3',  to:'n6',  color:'#e8982a', label:'prijzen'},
+    {id:'e6',  from:'n4',  to:'n8',  color:'#e8982a', label:'media klaar'},
+    {id:'e7',  from:'n5',  to:'n7',  color:'#12b09e', label:'varianten'},
+    {id:'e8',  from:'n5',  to:'n9',  color:'#d42680', label:'naar specs'},
+    {id:'e9',  from:'n6',  to:'n9',  color:'#d42680', label:'prijzen ok'},
+    {id:'e10', from:'n7',  to:'n9',  color:'#d42680', label:'SKU/EAN ok'},
+    {id:'e11', from:'n8',  to:'n9',  color:'#d42680', label:'media ok'},
+    {id:'e12', from:'n9',  to:'n10', color:'#1ab84e', label:'SEO'},
+    {id:'e13', from:'n9',  to:'n11', color:'#1ab84e', label:'opslaan'},
+    {id:'e14', from:'n10', to:'n11', color:'#1ab84e', label:'draft'}
+  ],
+  legend:[
+    {color:'#e8982a',label:'Databronnen'},
+    {color:'#12b09e',label:'Shopify stappen'},
+    {color:'#d42680',label:'Specificaties'},
+    {color:'#1ab84e',label:'Afronden'}
+  ]
+};
+
 // ── STORAGE ──────────────────────────────────────────────────────────────
 function saveAll(){
   try{ localStorage.setItem('zelesta_flows_v3', JSON.stringify(flows)); }catch(e){}
@@ -1162,7 +1201,17 @@ function loadStorage(){
     const d = localStorage.getItem('zelesta_flows_v3');
     if(d) flows = JSON.parse(d);
   }catch(e){}
-  if(!Object.keys(flows).length) flows = {prijzen: JSON.parse(JSON.stringify(INIT_FLOW))};
+  if(!Object.keys(flows).length){
+    flows = {
+      'prijzen':           JSON.parse(JSON.stringify(INIT_FLOW)),
+      'product-aanmaken':  JSON.parse(JSON.stringify(INIT_FLOW_2))
+    };
+  }
+  // Migration: inject product-aanmaken for existing users who already have localStorage
+  if(!flows['product-aanmaken']){
+    flows['product-aanmaken'] = JSON.parse(JSON.stringify(INIT_FLOW_2));
+    try{ localStorage.setItem('zelesta_flows_v3', JSON.stringify(flows)); }catch(e){}
+  }
 }
 
 // ── SIDEBAR ──────────────────────────────────────────────────────────────
