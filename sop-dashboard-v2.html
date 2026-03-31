@@ -426,6 +426,7 @@ body {
 /* During edge drawing */
 .drawing-edge { cursor: crosshair !important; }
 .drawing-edge .node { cursor: crosshair !important; }
+.drawing-edge .node-toolbar { display: none !important; }
 .drawing-edge .port-in {
   transform: scale(1.8);
   box-shadow: 0 0 12px var(--acc);
@@ -981,6 +982,7 @@ let nodeIdCounter = 1;
 let edgeIdCounter = 1;
 let history = [];
 let future  = [];
+let edgeHoverTarget = null;
 
 // ── UNDO / REDO ──────────────────────────────────────────────────────────
 function snapshot(){
@@ -1263,6 +1265,18 @@ function createNodeEl(n){
   el.addEventListener('click', e=>{
     if(e.target.closest('.ntb-btn')) return;
     selectNode(n.id);
+  });
+
+  // Edge drop target detection via mouseenter/mouseleave (most reliable)
+  el.addEventListener('mouseenter', ()=>{
+    if(drawingEdge && n.id !== drawingEdge.fromId){
+      edgeHoverTarget = n.id;
+      el.classList.add('edge-target-hover');
+    }
+  });
+  el.addEventListener('mouseleave', ()=>{
+    if(edgeHoverTarget === n.id) edgeHoverTarget = null;
+    el.classList.remove('edge-target-hover');
   });
 
   canvas.appendChild(el);
@@ -1635,34 +1649,15 @@ window.addEventListener('mousemove', e=>{
     pan.y = panning.panY+(e.clientY-panning.startY);
     applyTransform();
   }
-  if(drawingEdge){
-    renderEdges();
-    // Highlight which node the cursor is over as drop target
-    document.querySelectorAll('.node').forEach(nodeEl => {
-      if(nodeEl.id === 'node-'+drawingEdge.fromId){ return; }
-      const r = nodeEl.getBoundingClientRect();
-      const over = e.clientX >= r.left && e.clientX <= r.right &&
-                   e.clientY >= r.top  && e.clientY <= r.bottom;
-      nodeEl.classList.toggle('edge-target-hover', over);
-    });
-  }
+  if(drawingEdge) renderEdges();
 });
 window.addEventListener('mouseup', e=>{
   if(dragging){ dragging=null; saveAll(); }
   if(panning){ panning=null; document.getElementById('canvas').classList.remove('panning'); }
   if(drawingEdge){
-    // Find which node the cursor is over using screen bounding rects
-    let targetId = null;
-    document.querySelectorAll('.node').forEach(nodeEl => {
-      if(nodeEl.id === 'node-'+drawingEdge.fromId) return;
-      const r = nodeEl.getBoundingClientRect();
-      if(e.clientX >= r.left && e.clientX <= r.right &&
-         e.clientY >= r.top  && e.clientY <= r.bottom){
-        targetId = nodeEl.id.replace('node-','');
-      }
-    });
-    if(targetId) addEdge(drawingEdge.fromId, targetId);
+    if(edgeHoverTarget) addEdge(drawingEdge.fromId, edgeHoverTarget);
     drawingEdge = null;
+    edgeHoverTarget = null;
     document.getElementById('canvas').classList.remove('drawing-edge');
     document.querySelectorAll('.edge-source,.edge-target-hover').forEach(el=>{
       el.classList.remove('edge-source','edge-target-hover');
