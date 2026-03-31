@@ -411,17 +411,29 @@ body {
 /* Ports */
 .port {
   position: absolute;
-  width: 10px; height: 10px;
+  width: 14px; height: 14px;
   border-radius: 50%;
   border: 2px solid var(--bg);
   background: var(--b3);
   cursor: crosshair;
-  transition: transform 0.12s, box-shadow 0.12s;
+  transition: transform 0.15s, box-shadow 0.15s;
   z-index: 5;
 }
-.port:hover { transform: scale(1.4); }
-.port-out { right: -5px; }
-.port-in  { left:  -5px; pointer-events: none; }
+.port:hover { transform: scale(1.5); box-shadow: 0 0 8px currentColor; }
+.port-out { right: -7px; }
+.port-in  { left:  -7px; pointer-events: none; }
+
+/* During edge drawing: highlight all port-in targets */
+.drawing-edge .port-in {
+  pointer-events: all;
+  transform: scale(1.6);
+  box-shadow: 0 0 10px var(--acc);
+}
+.drawing-edge .node:not(.edge-source):hover {
+  border-color: var(--acc);
+  box-shadow: 0 0 0 2px var(--acc-glow), var(--shadow-lg);
+  cursor: crosshair;
+}
 /* Port color variants */
 .port-blue  { background: var(--blue-t);  border-color: var(--blue-bg); }
 .port-amber { background: var(--amber-t); border-color: var(--amber-bg);}
@@ -1243,16 +1255,8 @@ function createNodeEl(n){
   portOut.addEventListener('mousedown', e=>{
     e.stopPropagation(); e.preventDefault();
     drawingEdge = { fromId:n.id };
-  });
-
-  const portIn = el.querySelector('.port-in');
-  portIn.addEventListener('mouseup', e=>{
-    e.stopPropagation();
-    if(drawingEdge && drawingEdge.fromId !== n.id){
-      addEdge(drawingEdge.fromId, n.id);
-    }
-    drawingEdge = null;
-    renderEdges();
+    document.getElementById('canvas').classList.add('drawing-edge');
+    el.classList.add('edge-source');
   });
 
   el.addEventListener('click', e=>{
@@ -1632,7 +1636,19 @@ window.addEventListener('mousemove', e=>{
 window.addEventListener('mouseup', e=>{
   if(dragging){ dragging=null; saveAll(); }
   if(panning){ panning=null; document.getElementById('canvas').classList.remove('panning'); }
-  if(drawingEdge){ drawingEdge=null; renderEdges(); }
+  if(drawingEdge){
+    // Find which node is under the cursor using elementsFromPoint
+    const els = document.elementsFromPoint(e.clientX, e.clientY);
+    const targetNode = els.find(el => el.classList.contains('node') && el.id !== 'node-'+drawingEdge.fromId);
+    if(targetNode){
+      const toId = targetNode.id.replace('node-','');
+      addEdge(drawingEdge.fromId, toId);
+    }
+    drawingEdge = null;
+    document.getElementById('canvas').classList.remove('drawing-edge');
+    document.querySelectorAll('.edge-source').forEach(el=>el.classList.remove('edge-source'));
+    renderEdges();
+  }
 });
 wrap.addEventListener('wheel', e=>{
   e.preventDefault();
