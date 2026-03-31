@@ -1207,6 +1207,51 @@ const INIT_FLOW_2 = {
   ]
 };
 
+const INIT_FLOW_3 = {
+  id:'product-live', name:'Product van aanmaken tot live', owner:'Webshop Operations', version:'v1.0', color:'green',
+  nodes:[
+    {id:'n1',  x:40,   y:380, color:'blue',  title:'Trigger',           label:'Aanvraag nieuw product',       desc:'Email ontvangen van Head of Sales of Head of Supply. Bevat productnaam, kleurvariant en planningsdatum.', footer:'trigger → start'},
+    {id:'n2',  x:320,  y:180, color:'amber', title:'Databron A',         label:'Google Sheet openen',          desc:'Sheet van Supply: SKU, EAN/barcode, inkoopprijs, leverancier, tijk voor/achterzijde, vulling, materiaal, warmteklasse, wasmachine formaat, wasinstructies, droger, instopstrook, brandveilig, gewicht, temperatuur regulerend.', footer:'supply → sheet'},
+    {id:'n3',  x:320,  y:400, color:'amber', title:'Databron B',         label:'Email — prijzen ophalen',      desc:'Van Head of Sales / Head of Category: verkoopprijs en compare at price per maat.', footer:'sales → prijs'},
+    {id:'n4',  x:320,  y:600, color:'amber', title:'Databron C',         label:'Fotos — leverancier',          desc:"Leverancier stuurt ruwe productfotos via email of WeTransfer. Worden doorgestuurd naar Design voor webshop-klaar maken.", footer:'leverancier → design'},
+    {id:'n5',  x:640,  y:180, color:'teal',  title:'Shopify — Stap 1',   label:'Product aanmaken',             desc:'Nieuw product in Shopify Admin. Titel: Zelesta [Naam] - [Kleur]. Voorbeeld: Zelesta Special Seersucker Zomerdekbed - Amandelmelk Beige. Product type (bijv. Dekbed). Vendor = leverancier uit sheet. URL handle automatisch.', footer:'admin/products/new'},
+    {id:'n6',  x:640,  y:400, color:'teal',  title:'Shopify — Stap 2',   label:'Prijzen + varianten',          desc:'Price (email), Compare at price (email), Cost per item (sheet). 4 varianten: 140x200 cm (S), 160x220 cm (M), 200x200 cm (L), 240x200 cm (XL). Per variant eigen SKU + EAN uit sheet. Qonfi op SKU-level instellen.', footer:'sheet + email → varianten'},
+    {id:'n7',  x:640,  y:600, color:'teal',  title:'Shopify — Stap 3',   label:'Metafields invullen',          desc:'Specificaties HTML (zl-spec-grid) vanuit sheet. Dropdowns: Materiaal, Color, Upsell. Seizoen tags: Zomer / 4 Seizoenen / Dubbel / Elk seizoen. Pre order, Icon 1/2, Custom badge, No Overlay indien van toepassing.', footer:'sheet → metafields'},
+    {id:'n8',  x:960,  y:180, color:'pink',  title:'Design',              label:'Afbeeldingen webshop-klaar',   desc:'Design maakt ruwe leveranciersbeelden webshop-klaar: bijsnijden, achtergrond, formaat. Definitieve afbeeldingen worden aangeleverd aan Webshop Operations.', footer:'design → beelden klaar'},
+    {id:'n9',  x:960,  y:580, color:'pink',  title:'Copywriter',          label:'Beschrijving schrijven',       desc:'Copywriter heeft eigen planning, ontvangt opdracht van Head of Supply/Sales. Schrijft NL beschrijving als vrije tekst en levert op via gedeeld Google Doc. Geen aparte review nodig.', footer:'google doc → beschrijving'},
+    {id:'n10', x:1280, y:180, color:'teal',  title:'Shopify — Stap 4',   label:'Afbeeldingen uploaden',        desc:'Definitieve webshop-klare fotos van Design uploaden in Shopify. Hero-afbeelding als eerste instellen. Alt teksten worden automatisch aangevuld door de app.', footer:'design → shopify upload'},
+    {id:'n11', x:1280, y:500, color:'teal',  title:'Shopify — Stap 5',   label:'Beschrijving + SEO',           desc:'Beschrijving uit Google Doc van copywriter kopieren en direct plakken in Shopify body — geen aparte review. SEO-titel = producttitel. Meta description 155 tekens op basis van producttype en specs.', footer:'google doc → shopify'},
+    {id:'n12', x:1560, y:340, color:'blue',  title:'QA — Controle',       label:'Check + Slack review',         desc:'Eigen visuele check op productpagina preview + alle velden in Shopify Admin controleren. Daarna in Slack vragen of collega\'s nog even meekijken voor tweede check.', footer:'preview + slack → check'},
+    {id:'n13', x:1840, y:340, color:'green', title:'Live zetten',          label:'Draft naar Active',            desc:'Na eigen check en Slack feedback: product status van Draft naar Active zetten. Smart collections vullen automatisch op basis van producttitel en producttype. Product is live.', footer:'draft → active → live'}
+  ],
+  edges:[
+    {id:'e1',  from:'n1',  to:'n2',  color:'#f59e0b', label:'sheet openen'},
+    {id:'e2',  from:'n1',  to:'n3',  color:'#f59e0b', label:'prijs ophalen'},
+    {id:'e3',  from:'n1',  to:'n4',  color:'#f59e0b', label:'fotos leverancier'},
+    {id:'e4',  from:'n2',  to:'n5',  color:'#f59e0b', label:'basis data'},
+    {id:'e5',  from:'n3',  to:'n6',  color:'#f59e0b', label:'prijzen'},
+    {id:'e6',  from:'n2',  to:'n6',  color:'#f59e0b', label:'SKU/EAN'},
+    {id:'e7',  from:'n2',  to:'n7',  color:'#f59e0b', label:'specs'},
+    {id:'e8',  from:'n4',  to:'n8',  color:'#d42680', label:'ruw materiaal'},
+    {id:'e9',  from:'n1',  to:'n9',  color:'#d42680', label:'opdracht copy'},
+    {id:'e10', from:'n5',  to:'n10', color:'#12b09e', label:'product klaar'},
+    {id:'e11', from:'n8',  to:'n10', color:'#12b09e', label:'beelden klaar'},
+    {id:'e12', from:'n9',  to:'n11', color:'#12b09e', label:'tekst klaar'},
+    {id:'e13', from:'n6',  to:'n11', color:'#12b09e', label:'varianten ok'},
+    {id:'e14', from:'n7',  to:'n11', color:'#12b09e', label:'metafields ok'},
+    {id:'e15', from:'n10', to:'n12', color:'#4a7cf8', label:'alles ingevuld'},
+    {id:'e16', from:'n11', to:'n12', color:'#4a7cf8', label:'content ok'},
+    {id:'e17', from:'n12', to:'n13', color:'#1ab84e', label:'goedgekeurd'}
+  ],
+  legend:[
+    {color:'#f59e0b',label:'Databronnen'},
+    {color:'#12b09e',label:'Shopify stappen'},
+    {color:'#d42680',label:'Design & Copy'},
+    {color:'#4a7cf8',label:'QA'},
+    {color:'#1ab84e',label:'Live'}
+  ]
+};
+
 // ── STORAGE ──────────────────────────────────────────────────────────────
 function saveAll(){
   try{ localStorage.setItem('zelesta_flows_v3', JSON.stringify(flows)); }catch(e){}
@@ -1219,15 +1264,16 @@ function loadStorage(){
   }catch(e){}
   if(!Object.keys(flows).length){
     flows = {
-      'prijzen':           JSON.parse(JSON.stringify(INIT_FLOW)),
-      'product-aanmaken':  JSON.parse(JSON.stringify(INIT_FLOW_2))
+      'prijzen':          JSON.parse(JSON.stringify(INIT_FLOW)),
+      'product-aanmaken': JSON.parse(JSON.stringify(INIT_FLOW_2)),
+      'product-live':     JSON.parse(JSON.stringify(INIT_FLOW_3))
     };
   }
-  // Migration: inject product-aanmaken for existing users who already have localStorage
-  if(!flows['product-aanmaken']){
-    flows['product-aanmaken'] = JSON.parse(JSON.stringify(INIT_FLOW_2));
-    try{ localStorage.setItem('zelesta_flows_v3', JSON.stringify(flows)); }catch(e){}
-  }
+  // Migration: inject missing seed flows for existing users
+  let migrated = false;
+  if(!flows['product-aanmaken']){ flows['product-aanmaken'] = JSON.parse(JSON.stringify(INIT_FLOW_2)); migrated = true; }
+  if(!flows['product-live']){     flows['product-live']     = JSON.parse(JSON.stringify(INIT_FLOW_3)); migrated = true; }
+  if(migrated){ try{ localStorage.setItem('zelesta_flows_v3', JSON.stringify(flows)); }catch(e){} }
 }
 
 // ── SIDEBAR ──────────────────────────────────────────────────────────────
