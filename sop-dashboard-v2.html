@@ -649,6 +649,58 @@ body {
 }
 .btn-confirm:hover { background: #6690ff; }
 
+/* ── SEARCH ──────────────────────────────────────────────────────────── */
+.search-match { box-shadow: 0 0 0 2px var(--acc), var(--shadow-lg) !important; }
+.search-dim   { opacity: 0.2; pointer-events: none; }
+.search-wrap {
+  display: flex; align-items: center;
+  background: var(--s2); border: 1px solid var(--b1);
+  border-radius: var(--r); padding: 0 10px; gap: 6px;
+  transition: border-color 0.15s;
+}
+.search-wrap:focus-within { border-color: var(--acc); }
+.search-wrap svg { color: var(--t3); flex-shrink: 0; }
+.search-input {
+  background: transparent; border: none; outline: none;
+  color: var(--t1); font-family: 'Geist', sans-serif;
+  font-size: 11px; width: 130px; padding: 5px 0;
+}
+.search-input::placeholder { color: var(--t3); }
+
+/* ── EXPORT DROPDOWN ─────────────────────────────────────────────────── */
+.export-wrap { position: relative; }
+.export-menu {
+  position: absolute; top: calc(100% + 6px); right: 0;
+  background: var(--s1); border: 1px solid var(--b2);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-lg);
+  min-width: 175px; z-index: 200;
+  display: none; flex-direction: column; padding: 4px;
+}
+.export-menu.open { display: flex; }
+.export-menu button {
+  background: transparent; border: none; color: var(--t2);
+  font-family: 'Geist', sans-serif; font-size: 11px; font-weight: 500;
+  padding: 7px 12px; text-align: left; cursor: pointer;
+  border-radius: 6px; display: flex; align-items: center; gap: 8px;
+  transition: background 0.12s, color 0.12s;
+}
+.export-menu button:hover { background: var(--b1); color: var(--t1); }
+.export-menu-sep { height: 1px; background: var(--b1); margin: 3px 0; }
+
+/* ── DISABLED BUTTON ─────────────────────────────────────────────────── */
+.tb-btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+
+/* ── SHORTCUTS MODAL ─────────────────────────────────────────────────── */
+.shortcuts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; }
+.shortcut-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.shortcut-key {
+  background: var(--s2); border: 1px solid var(--b2);
+  border-radius: 5px; padding: 2px 8px;
+  font-family: 'Geist Mono', monospace; font-size: 10px;
+  color: var(--t1); white-space: nowrap; flex-shrink: 0;
+}
+.shortcut-desc { font-size: 11px; color: var(--t2); }
+
 /* ── HINT TOAST ──────────────────────────────────────────────────────── */
 #hint {
   position: fixed;
@@ -669,6 +721,8 @@ body {
 }
 #hint.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 <div class="app">
@@ -704,6 +758,15 @@ body {
         <div class="tb-meta" id="tbMeta"></div>
       </div>
       <div class="tb-sep"></div>
+      <button class="tb-btn" id="undoBtn" onclick="undo()" title="Ongedaan maken (Ctrl+Z)" disabled>
+        <svg viewBox="0 0 16 16" fill="none" width="13" height="13"><path d="M4 6H10.5C12.4 6 14 7.6 14 9.5S12.4 13 10.5 13H6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M2 4l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Undo
+      </button>
+      <button class="tb-btn" id="redoBtn" onclick="redo()" title="Opnieuw (Ctrl+Y)" disabled>
+        <svg viewBox="0 0 16 16" fill="none" width="13" height="13"><path d="M12 6H5.5C3.6 6 2 7.6 2 9.5S3.6 13 5.5 13H10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M14 4l-2 2 2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Redo
+      </button>
+      <div class="tb-sep"></div>
       <button class="tb-btn" onclick="addNode()">
         <svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         Node
@@ -720,6 +783,37 @@ body {
         <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>
         Fit
       </button>
+      <div class="tb-sep"></div>
+      <div class="export-wrap" id="exportWrap">
+        <button class="tb-btn" onclick="toggleExportMenu()">
+          <svg viewBox="0 0 16 16" fill="none" width="13" height="13"><path d="M8 2v8M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11v1.5A1.5 1.5 0 004.5 14h7a1.5 1.5 0 001.5-1.5V11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Exporteer ▾
+        </button>
+        <div class="export-menu" id="exportMenu">
+          <button onclick="exportJSON()">
+            <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 8h6M5 5.5h3M5 10.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            JSON downloaden
+          </button>
+          <button onclick="exportPNG()">
+            <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><circle cx="5.5" cy="6.5" r="1.2" stroke="currentColor" stroke-width="1.1"/><path d="M1 10l4-3 3 3 2-2 5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            PNG downloaden
+          </button>
+          <button onclick="exportPDF()">
+            <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><path d="M3 2h7l3 3v9a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/><path d="M10 2v4h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M5 9h2.5a1 1 0 000-2H5v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            PDF downloaden
+          </button>
+          <div class="export-menu-sep"></div>
+          <button onclick="importJSON()">
+            <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><path d="M8 14V6M5 9l3-3 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 5V3.5A1.5 1.5 0 014.5 2h7A1.5 1.5 0 0113 3.5V5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            JSON importeren
+          </button>
+        </div>
+      </div>
+      <div class="tb-sep"></div>
+      <div class="search-wrap">
+        <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.4"/><path d="M10 10l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <input class="search-input" id="searchInput" placeholder="Zoeken…" oninput="searchNodes(this.value)"/>
+      </div>
     </div>
 
     <!-- CANVAS -->
@@ -825,6 +919,29 @@ body {
   </div>
 </div>
 
+<!-- SHORTCUTS MODAL -->
+<div class="modal-overlay" id="shortcutsModal">
+  <div class="modal">
+    <div class="modal-header">
+      Sneltoetsen
+      <button class="panel-close" onclick="closeModal('shortcutsModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="shortcuts-grid">
+        <div class="shortcut-row"><span class="shortcut-desc">Ongedaan maken</span><span class="shortcut-key">Ctrl Z</span></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Opnieuw</span><span class="shortcut-key">Ctrl Y</span></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Opslaan</span><span class="shortcut-key">Ctrl S</span></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Paneel sluiten</span><span class="shortcut-key">Escape</span></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Node verwijderen</span><span class="shortcut-key">Delete</span></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Sneltoetsen</span><span class="shortcut-key">?</span></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-confirm" onclick="closeModal('shortcutsModal')">Sluiten</button>
+    </div>
+  </div>
+</div>
+
 <!-- HINT TOAST -->
 <div id="hint"></div>
 
@@ -849,6 +966,137 @@ let drawingEdge = null;
 let mousePos = {x:0, y:0};
 let nodeIdCounter = 1;
 let edgeIdCounter = 1;
+let history = [];
+let future  = [];
+
+// ── UNDO / REDO ──────────────────────────────────────────────────────────
+function snapshot(){
+  const f = flows[activeFlowId];
+  if(!f) return;
+  history.push(JSON.stringify({nodes:[...f.nodes], edges:[...(f.edges||[])]}));
+  if(history.length > 60) history.shift();
+  future = [];
+  updateUndoRedoBtns();
+}
+function undo(){
+  const f = flows[activeFlowId];
+  if(!f || !history.length) return;
+  future.push(JSON.stringify({nodes:[...f.nodes], edges:[...(f.edges||[])]}));
+  const prev = JSON.parse(history.pop());
+  f.nodes = prev.nodes; f.edges = prev.edges;
+  renderGraph(); saveAll(); updateUndoRedoBtns();
+  showHint('Ongedaan gemaakt');
+}
+function redo(){
+  const f = flows[activeFlowId];
+  if(!f || !future.length) return;
+  history.push(JSON.stringify({nodes:[...f.nodes], edges:[...(f.edges||[])]}));
+  const next = JSON.parse(future.pop());
+  f.nodes = next.nodes; f.edges = next.edges;
+  renderGraph(); saveAll(); updateUndoRedoBtns();
+  showHint('Opnieuw uitgevoerd');
+}
+function updateUndoRedoBtns(){
+  const u = document.getElementById('undoBtn');
+  const r = document.getElementById('redoBtn');
+  if(u) u.disabled = history.length === 0;
+  if(r) r.disabled = future.length  === 0;
+}
+
+// ── EXPORT / IMPORT ──────────────────────────────────────────────────────
+function exportJSON(){
+  const f = flows[activeFlowId];
+  if(!f) return;
+  const data = JSON.stringify({name:f.name, owner:f.owner, version:f.version, color:f.color, nodes:f.nodes, edges:f.edges, legend:f.legend}, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = f.name.replace(/\s+/g,'_')+'.json'; a.click();
+  URL.revokeObjectURL(url);
+  showHint('JSON gedownload ✓');
+  closeExportMenu();
+}
+function importJSON(){
+  closeExportMenu();
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        const id   = 'flow_'+Date.now();
+        flows[id]  = {id, name:data.name||file.name.replace('.json',''), owner:data.owner||'', version:data.version||'v1.0', color:data.color||'blue', nodes:data.nodes||[], edges:data.edges||[], legend:data.legend||[]};
+        saveAll(); renderSidebar(); loadFlow(id);
+        showHint('Workflow geïmporteerd ✓');
+      } catch(err) { showHint('Fout bij importeren ✗'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+function exportPNG(){
+  const holder = document.getElementById('canvasHolder');
+  showHint('PNG wordt gemaakt…');
+  closeExportMenu();
+  html2canvas(holder, {backgroundColor:'#070a10', scale:2, useCORS:true}).then(canvas => {
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = (flows[activeFlowId]?.name||'workflow').replace(/\s+/g,'_')+'.png';
+    a.click();
+    showHint('PNG gedownload ✓');
+  });
+}
+function exportPDF(){
+  const holder = document.getElementById('canvasHolder');
+  showHint('PDF wordt gemaakt…');
+  closeExportMenu();
+  html2canvas(holder, {backgroundColor:'#070a10', scale:2, useCORS:true}).then(canvas => {
+    const {jsPDF} = window.jspdf;
+    const pdf = new jsPDF({orientation:'landscape', unit:'px', format:[canvas.width/2, canvas.height/2]});
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width/2, canvas.height/2);
+    pdf.save((flows[activeFlowId]?.name||'workflow').replace(/\s+/g,'_')+'.pdf');
+    showHint('PDF gedownload ✓');
+  });
+}
+
+// ── EXPORT MENU TOGGLE ────────────────────────────────────────────────────
+function toggleExportMenu(){
+  document.getElementById('exportMenu').classList.toggle('open');
+}
+function closeExportMenu(){
+  document.getElementById('exportMenu').classList.remove('open');
+}
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#exportWrap')) closeExportMenu();
+});
+
+// ── SEARCH ────────────────────────────────────────────────────────────────
+function searchNodes(query){
+  const q = query.trim().toLowerCase();
+  const f = flows[activeFlowId];
+  if(!f) return;
+  document.querySelectorAll('.node').forEach(el=>{
+    const id   = el.id.replace('node-','');
+    const node = f.nodes.find(n=>n.id===id);
+    if(!node){ el.classList.remove('search-match','search-dim'); return; }
+    if(!q){
+      el.classList.remove('search-match','search-dim');
+    } else {
+      const text = [node.title, node.label, node.desc, node.footer].join(' ').toLowerCase();
+      if(text.includes(q)){
+        el.classList.add('search-match'); el.classList.remove('search-dim');
+      } else {
+        el.classList.add('search-dim'); el.classList.remove('search-match');
+      }
+    }
+  });
+}
+
+// ── SHORTCUTS MODAL ───────────────────────────────────────────────────────
+function showShortcuts(){ document.getElementById('shortcutsModal').classList.add('open'); }
 
 // ── INITIAL DATA ─────────────────────────────────────────────────────────
 function makeId(prefix){ return prefix + '_' + (nodeIdCounter++); }
@@ -923,6 +1171,9 @@ function loadFlow(id){
   const f = flows[id];
   if(!f) return;
   activeFlowId = id;
+  history = []; future = []; updateUndoRedoBtns();
+  const si = document.getElementById('searchInput');
+  if(si){ si.value=''; searchNodes(''); }
   renderSidebar();
   document.getElementById('emptyState').style.display = 'none';
   document.getElementById('canvasHolder').style.display = 'block';
@@ -1094,6 +1345,7 @@ function renderEdges(){
 function addEdge(fromId, toId){
   const f = flows[activeFlowId];
   if(!f) return;
+  snapshot();
   const fromNode = f.nodes.find(n=>n.id===fromId);
   const color    = COLORS[fromNode?.color]||'#38476a';
   f.edges = f.edges||[];
@@ -1104,6 +1356,7 @@ function addEdge(fromId, toId){
 function deleteEdge(id){
   const f = flows[activeFlowId];
   if(!f) return;
+  snapshot();
   f.edges = f.edges.filter(e=>e.id!==id);
   renderEdges();
   saveAll();
@@ -1113,6 +1366,7 @@ function deleteEdge(id){
 function addNode(){
   const f = flows[activeFlowId];
   if(!f) return;
+  snapshot();
   const id = makeId('n');
   const cx = (-pan.x/zoom) + 200;
   const cy = (-pan.y/zoom) + 150;
@@ -1128,6 +1382,7 @@ function addNode(){
 function duplicateNode(id){
   const f = flows[activeFlowId];
   if(!f) return;
+  snapshot();
   const src = f.nodes.find(n=>n.id===id);
   if(!src) return;
   const newId = makeId('n');
@@ -1141,6 +1396,7 @@ function duplicateNode(id){
 function deleteNode(id){
   const f = flows[activeFlowId];
   if(!f) return;
+  snapshot();
   f.nodes = f.nodes.filter(n=>n.id!==id);
   f.edges = (f.edges||[]).filter(e=>e.from!==id&&e.to!==id);
   document.getElementById('node-'+id)?.remove();
@@ -1156,6 +1412,8 @@ function fieldBlur(nodeId, field, value){
   if(!f) return;
   const node = f.nodes.find(n=>n.id===nodeId);
   if(!node) return;
+  if(node[field] === value.trim()) return;
+  snapshot();
   node[field] = value.trim();
   saveAll();
 }
@@ -1209,6 +1467,7 @@ function updateNodeColor(id, color){
   if(!f) return;
   const node = f.nodes.find(n=>n.id===id);
   if(!node) return;
+  snapshot();
   node.color = color;
   const el = document.getElementById('node-'+id);
   if(!el) return;
@@ -1388,12 +1647,21 @@ wrap.addEventListener('wheel', e=>{
 },{passive:false});
 
 window.addEventListener('keydown', e=>{
+  const active = document.activeElement;
+  const typing = active.contentEditable==='true' || active.tagName==='INPUT' || active.tagName==='TEXTAREA';
   if(e.key==='Delete'||e.key==='Backspace'){
-    if(document.activeElement.contentEditable==='true') return;
+    if(typing) return;
     if(selectedNodeId) deleteNode(selectedNodeId);
   }
   if((e.ctrlKey||e.metaKey)&&e.key==='s'){ e.preventDefault(); saveAll(); }
-  if(e.key==='Escape'){ closePanel(); drawingEdge=null; renderEdges(); }
+  if((e.ctrlKey||e.metaKey)&&e.key==='z'){ e.preventDefault(); undo(); }
+  if((e.ctrlKey||e.metaKey)&&(e.key==='y'||(e.shiftKey&&e.key==='Z'))){ e.preventDefault(); redo(); }
+  if(e.key==='Escape'){
+    closePanel(); closeExportMenu(); drawingEdge=null; renderEdges();
+    const si = document.getElementById('searchInput');
+    if(si){ si.value=''; searchNodes(''); }
+  }
+  if(e.key==='?'&&!typing){ showShortcuts(); }
 });
 document.getElementById('canvas').addEventListener('click', e=>{
   if(e.target.id==='canvas'){
