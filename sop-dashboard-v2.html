@@ -799,6 +799,184 @@ body {
   font-family: 'Geist Mono', monospace;
 }
 #hint.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── PERFORMANCE DASHBOARD ───────────────────────────────────────────── */
+.perf-section {
+  background: var(--s1);
+  border: 1px solid var(--b1);
+  border-radius: var(--r-xl);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.perf-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.perf-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--t1);
+  letter-spacing: -0.1px;
+}
+.perf-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--b1);
+}
+.perf-form-row { display: flex; gap: 8px; align-items: center; }
+.perf-input {
+  background: var(--s2);
+  border: 1px solid var(--b2);
+  border-radius: var(--r);
+  color: var(--t1);
+  font-family: 'Geist', sans-serif;
+  font-size: 11px;
+  padding: 7px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+  flex: 1;
+  min-width: 0;
+}
+.perf-input:focus { border-color: var(--acc); }
+.perf-input::placeholder { color: var(--t3); }
+.perf-input[type=number] { -moz-appearance: textfield; }
+.perf-input[type=number]::-webkit-outer-spin-button,
+.perf-input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+.perf-btn {
+  background: var(--s2);
+  border: 1px solid var(--b2);
+  border-radius: var(--r);
+  color: var(--t2);
+  font-family: 'Geist', sans-serif;
+  font-size: 11px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.perf-btn:hover { background: var(--b1); color: var(--t1); border-color: var(--b3); }
+.perf-btn-add  { background: var(--acc); color: #fff; border-color: var(--acc); font-weight: 500; }
+.perf-btn-add:hover { background: #3d6de8; border-color: #3d6de8; }
+.perf-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.perf-list::-webkit-scrollbar { width: 3px; }
+.perf-list::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 10px; }
+.perf-row {
+  background: var(--s2);
+  border: 1px solid var(--b1);
+  border-radius: var(--r);
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: border-color 0.15s;
+}
+.perf-row:hover { border-color: var(--b3); }
+.perf-row-title { font-size: 12px; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.perf-row-meta  { font-size: 10px; color: var(--t2); margin-top: 2px; }
+.perf-row-del   {
+  background: none; border: none; color: var(--t3);
+  font-size: 11px; cursor: pointer; padding: 2px 5px;
+  border-radius: 4px; line-height: 1;
+}
+.perf-row-del:hover { background: var(--red-bg); color: var(--red-t); }
+.perf-badge {
+  font-size: 9px; font-weight: 600; padding: 2px 8px;
+  border-radius: 100px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;
+}
+.badge-open   { background: var(--amber-bg); color: var(--amber-t); border: 1px solid var(--amber-border); }
+.badge-closed { background: var(--green-bg);  color: var(--green-t);  border: 1px solid var(--green-border); }
+.badge-recent { background: var(--teal-bg);   color: var(--teal-t);   border: 1px solid var(--teal-border); }
+.badge-old    { background: var(--s3);         color: var(--t3);       border: 1px solid var(--b2); }
+.perf-empty { font-size: 11px; color: var(--t3); text-align: center; padding: 16px 0; font-style: italic; }
+
+/* Notes */
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 10px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+.notes-grid::-webkit-scrollbar { width: 3px; }
+.notes-grid::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 10px; }
+.note-card {
+  border: 1px solid transparent;
+  border-radius: var(--r);
+  padding: 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 80px;
+  transition: transform 0.1s;
+}
+.note-card:hover { transform: translateY(-1px); }
+.note-text { font-size: 11px; line-height: 1.65; word-break: break-word; flex: 1; }
+.note-footer { display: flex; align-items: center; justify-content: space-between; }
+.note-del { background: none; border: none; cursor: pointer; font-size: 11px; padding: 0; line-height: 1; opacity: 0.5; }
+.note-del:hover { opacity: 1; }
+
+/* Kanban */
+.kanban-board { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.kanban-col   { display: flex; flex-direction: column; gap: 6px; }
+.kanban-col-header {
+  padding: 7px 10px;
+  background: var(--s2);
+  border-radius: var(--r);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--b1);
+}
+.kanban-col-title { font-size: 11px; font-weight: 600; color: var(--t1); }
+.kanban-count {
+  font-size: 9px; color: var(--t2);
+  background: var(--s3); padding: 1px 7px;
+  border-radius: 100px;
+}
+.kanban-cards { display: flex; flex-direction: column; gap: 5px; min-height: 32px; }
+.kanban-card {
+  background: var(--s2);
+  border: 1px solid var(--b2);
+  border-radius: var(--r);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.15s;
+}
+.kanban-card:hover { border-color: var(--b3); }
+.kanban-card-title    { font-size: 11px; color: var(--t1); line-height: 1.45; }
+.kanban-card-assignee { font-size: 10px; color: var(--t2); }
+.kanban-card-actions  { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; align-items: center; }
+.kanban-mv-btn {
+  background: var(--s3); border: 1px solid var(--b2);
+  border-radius: 4px; color: var(--t2);
+  font-size: 9px; padding: 2px 7px;
+  cursor: pointer; font-family: 'Geist', sans-serif;
+  transition: all 0.12s;
+}
+.kanban-mv-btn:hover { background: var(--b2); color: var(--t1); }
+.kanban-del-btn {
+  background: none; border: none;
+  color: var(--t3); font-size: 10px;
+  cursor: pointer; margin-left: auto;
+  padding: 2px 5px; border-radius: 4px; line-height: 1;
+}
+.kanban-del-btn:hover { background: var(--red-bg); color: var(--red-t); }
+.kanban-empty { font-size: 10px; color: var(--t3); text-align: center; padding: 10px; font-style: italic; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -943,29 +1121,84 @@ body {
     </div>
 
     <!-- PERFORMANCE DASHBOARD VIEW -->
-    <div id="perfView" style="display:none; flex:1; overflow-y:auto; padding:32px; flex-direction:column; gap:24px; background:var(--bg);">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+    <div id="perfView" style="display:none; flex:1; overflow-y:auto; padding:28px 32px 60px; flex-direction:column; gap:20px; background:var(--bg);">
+
+      <!-- Header -->
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:4px;">
         <div>
-          <div style="font-size:20px; font-weight:700; letter-spacing:-0.5px; color:var(--t1);">Performance Dashboard</div>
-          <div style="font-size:12px; color:var(--t2); margin-top:4px;">Overzicht van sterke en zwakke punten in je workflows</div>
+          <div style="font-size:19px; font-weight:700; letter-spacing:-0.5px; color:var(--t1);">Performance Dashboard</div>
+          <div style="font-size:11px; color:var(--t2); margin-top:4px;">Team statistieken · Producten · Tickets · Notities · Taakoverzicht</div>
         </div>
-        <button onclick="showWorkflowsView()" style="background:var(--s2); border:1px solid var(--b2); border-radius:var(--r); color:var(--t2); font-size:11px; padding:6px 14px; cursor:pointer; font-family:'Geist',sans-serif; display:flex; align-items:center; gap:6px;">
-          <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Terug naar workflows
+        <button onclick="showWorkflowsView()" style="background:var(--s2); border:1px solid var(--b2); border-radius:var(--r); color:var(--t2); font-size:11px; padding:6px 14px; cursor:pointer; font-family:'Geist',sans-serif; display:flex; align-items:center; gap:6px; flex-shrink:0; transition:all 0.15s;" onmouseover="this.style.background='var(--b1)';this.style.color='var(--t1)'" onmouseout="this.style.background='var(--s2)';this.style.color='var(--t2)'">
+          <svg viewBox="0 0 16 16" fill="none" width="11" height="11"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Workflows
         </button>
       </div>
 
-      <!-- Stat cards -->
+      <!-- KPI Cards -->
       <div id="perfStats" style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px;"></div>
 
-      <!-- Coming soon placeholder -->
-      <div style="background:var(--s1); border:1px solid var(--b1); border-radius:var(--r-xl); padding:48px 32px; text-align:center; margin-top:8px;">
-        <div style="font-size:32px; margin-bottom:12px;">📊</div>
-        <div style="font-size:15px; font-weight:600; color:var(--t1); margin-bottom:8px;">Uitgebreide analytics komen eraan</div>
-        <div style="font-size:12px; color:var(--t2); max-width:400px; margin:0 auto; line-height:1.7;">
-          Hier komen straks statistieken over voltooiingssnelheid, knelpunten per stap, meest gebruikte workflows en teamperformance. Voor nu zie je alvast een samenvatting van je workflows hierboven.
+      <!-- Tickets + Products -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+
+        <!-- Ticket response time -->
+        <div class="perf-section">
+          <div class="perf-section-header">
+            <div class="perf-section-title">🎫 Ticket Response Times</div>
+          </div>
+          <div class="perf-form">
+            <input class="perf-input" id="ticketTitle" placeholder="Ticket omschrijving…"/>
+            <div class="perf-form-row">
+              <input class="perf-input" id="ticketHours" type="number" placeholder="Uur" min="0" style="width:64px; flex:none;"/>
+              <input class="perf-input" id="ticketMins"  type="number" placeholder="Min" min="0" max="59" style="width:64px; flex:none;"/>
+              <select class="perf-input" id="ticketStatus" style="flex:1;">
+                <option value="open">Open</option>
+                <option value="closed">Gesloten</option>
+              </select>
+              <button class="perf-btn perf-btn-add" onclick="addTicket()">+ Toevoegen</button>
+            </div>
+          </div>
+          <div id="ticketList" class="perf-list"></div>
+        </div>
+
+        <!-- Products pushed -->
+        <div class="perf-section">
+          <div class="perf-section-header">
+            <div class="perf-section-title">📦 Producten Online Gepusht</div>
+          </div>
+          <div class="perf-form">
+            <input class="perf-input" id="productName" placeholder="Productnaam of SKU…"/>
+            <div class="perf-form-row">
+              <input class="perf-input" id="productDate" type="date" style="flex:1;"/>
+              <button class="perf-btn perf-btn-add" onclick="addProduct()">+ Toevoegen</button>
+            </div>
+          </div>
+          <div id="productList" class="perf-list"></div>
         </div>
       </div>
+
+      <!-- Notes + Kanban -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+
+        <!-- Sticky notes -->
+        <div class="perf-section">
+          <div class="perf-section-header">
+            <div class="perf-section-title">📝 Notities</div>
+            <button class="perf-btn" onclick="addNote()">+ Notitie</button>
+          </div>
+          <div id="notesList" class="notes-grid"></div>
+        </div>
+
+        <!-- Mini kanban board -->
+        <div class="perf-section">
+          <div class="perf-section-header">
+            <div class="perf-section-title">📋 Taakoverzicht</div>
+            <button class="perf-btn" onclick="addBoardCard()">+ Taak</button>
+          </div>
+          <div class="kanban-board" id="kanbanBoard"></div>
+        </div>
+      </div>
+
     </div>
 
     <!-- NODE PANEL -->
@@ -1233,19 +1466,19 @@ function toggleWorkflowsSection(){
 }
 
 function showPerfDashboard(){
-  // Hide canvas area, show perf view
   document.getElementById('canvasHolder').style.display  = 'none';
   document.getElementById('emptyState').style.display    = 'none';
   document.getElementById('bottomBar').style.display     = 'none';
   document.getElementById('perfView').style.display      = 'flex';
-  // Update toolbar title
   document.getElementById('tbTitle').textContent = 'Performance Dashboard';
   document.getElementById('tbMeta').textContent  = '';
-  // Mark perf button active, deselect active flow in sidebar
   document.getElementById('btnPerf').classList.add('active');
   activeFlowId = null;
   renderSidebar();
-  renderPerfStats();
+  // Set default date to today
+  const pd = document.getElementById('productDate');
+  if(pd && !pd._defaultSet){ pd.value = new Date().toISOString().split('T')[0]; pd._defaultSet=true; }
+  renderPerfView();
 }
 
 function showWorkflowsView(){
@@ -1256,23 +1489,256 @@ function showWorkflowsView(){
   document.getElementById('emptyState').style.display = 'flex';
 }
 
+// ── PERFORMANCE DATA ──────────────────────────────────────────────────────
+let perfData = { tickets:[], products:[], notes:[], board:{todo:[],doing:[],done:[]} };
+
+function loadPerfData(){
+  try{
+    const raw = localStorage.getItem('zelesta_perf_v1');
+    if(raw){
+      const parsed = JSON.parse(raw);
+      perfData = Object.assign({ tickets:[], products:[], notes:[], board:{todo:[],doing:[],done:[]} }, parsed);
+      if(!perfData.board) perfData.board = {todo:[],doing:[],done:[]};
+    }
+  }catch(e){}
+}
+
+function savePerfData(){
+  try{ localStorage.setItem('zelesta_perf_v1', JSON.stringify(perfData)); }catch(e){}
+}
+
+function perfId(){ return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+
+function fmtDate(iso){
+  try{ return new Date(iso).toLocaleDateString('nl-NL',{day:'2-digit',month:'short',year:'numeric'}); }catch(e){ return ''; }
+}
+
+function fmtResponse(mins){
+  if(!mins && mins!==0) return '—';
+  if(mins===0) return '0m';
+  if(mins<60) return mins+'m';
+  const h = Math.floor(mins/60), m = mins%60;
+  return h+'u'+(m?` ${m}m`:'');
+}
+
+// ── TICKETS ───────────────────────────────────────────────────────────────
+function addTicket(){
+  const title = document.getElementById('ticketTitle').value.trim();
+  if(!title){ document.getElementById('ticketTitle').focus(); showHint('Voer een omschrijving in'); return; }
+  const h = parseInt(document.getElementById('ticketHours').value)||0;
+  const m = parseInt(document.getElementById('ticketMins').value)||0;
+  const status = document.getElementById('ticketStatus').value;
+  perfData.tickets.unshift({ id:perfId(), title, responseMin:h*60+m, status, date:new Date().toISOString() });
+  savePerfData();
+  document.getElementById('ticketTitle').value='';
+  document.getElementById('ticketHours').value='';
+  document.getElementById('ticketMins').value='';
+  renderPerfView();
+  showHint('Ticket toegevoegd');
+}
+
+function deleteTicket(id){
+  perfData.tickets = perfData.tickets.filter(t=>t.id!==id);
+  savePerfData(); renderPerfView();
+}
+
+function toggleTicketStatus(id){
+  const t = perfData.tickets.find(t=>t.id===id);
+  if(t){ t.status = t.status==='open'?'closed':'open'; savePerfData(); renderPerfView(); }
+}
+
+// ── PRODUCTS ──────────────────────────────────────────────────────────────
+function addProduct(){
+  const name = document.getElementById('productName').value.trim();
+  if(!name){ document.getElementById('productName').focus(); showHint('Voer een productnaam in'); return; }
+  const dateVal = document.getElementById('productDate').value;
+  perfData.products.unshift({ id:perfId(), name, date: dateVal ? new Date(dateVal).toISOString() : new Date().toISOString() });
+  savePerfData();
+  document.getElementById('productName').value='';
+  renderPerfView();
+  showHint('Product toegevoegd');
+}
+
+function deleteProduct(id){
+  perfData.products = perfData.products.filter(p=>p.id!==id);
+  savePerfData(); renderPerfView();
+}
+
+function productsLast30(){
+  const cutoff = Date.now()-30*24*60*60*1000;
+  return perfData.products.filter(p=>new Date(p.date).getTime()>cutoff);
+}
+
+// ── NOTES ─────────────────────────────────────────────────────────────────
+const NOTE_BG   = ['#2e1d04','#052914','#052920','#2a0520','#0d1e45','#280505'];
+const NOTE_TC   = ['#fcd896','#86efac','#5ee8d4','#f9a8d4','#a8c4ff','#fca5a5'];
+const NOTE_BD   = ['#5a3a08','#0a4a20','#0d5045','#5a0a38','#1e3a7a','#5a0808'];
+
+function addNote(){
+  const text = prompt('Notitie tekst:','');
+  if(!text||!text.trim()) return;
+  const idx = perfData.notes.length % NOTE_BG.length;
+  perfData.notes.push({ id:perfId(), text:text.trim(), colorIdx:idx, createdAt:new Date().toISOString() });
+  savePerfData(); renderPerfView();
+}
+
+function deleteNote(id){
+  perfData.notes = perfData.notes.filter(n=>n.id!==id);
+  savePerfData(); renderPerfView();
+}
+
+function editNote(id){
+  const note = perfData.notes.find(n=>n.id===id);
+  if(!note) return;
+  const text = prompt('Notitie bewerken:', note.text);
+  if(text===null||text===undefined) return;
+  if(text.trim()) note.text = text.trim();
+  savePerfData(); renderPerfView();
+}
+
+// ── KANBAN ────────────────────────────────────────────────────────────────
+function addBoardCard(){
+  const title = prompt('Nieuwe taak omschrijving:','');
+  if(!title||!title.trim()) return;
+  const assignee = prompt('Toegewezen aan (leeg = niemand):','') || '';
+  perfData.board.todo.push({ id:perfId(), title:title.trim(), assignee:assignee.trim() });
+  savePerfData(); renderPerfView();
+}
+
+function moveBoardCard(id, fromCol, toCol){
+  const cards = perfData.board[fromCol]||[];
+  const card = cards.find(c=>c.id===id);
+  if(!card) return;
+  perfData.board[fromCol] = cards.filter(c=>c.id!==id);
+  if(!perfData.board[toCol]) perfData.board[toCol]=[];
+  perfData.board[toCol].push(card);
+  savePerfData(); renderPerfView();
+}
+
+function deleteBoardCard(id, col){
+  perfData.board[col] = (perfData.board[col]||[]).filter(c=>c.id!==id);
+  savePerfData(); renderPerfView();
+}
+
+// ── RENDER PERF VIEW ──────────────────────────────────────────────────────
 function renderPerfStats(){
+  // KPI cards
   const allFlows = Object.values(flows);
-  const totalNodes = allFlows.reduce((s,f)=>(s+(f.nodes||[]).length),0);
-  const totalEdges = allFlows.reduce((s,f)=>(s+(f.edges||[]).length),0);
+  const closedT  = perfData.tickets.filter(t=>t.status==='closed');
+  const openT    = perfData.tickets.filter(t=>t.status==='open');
+  const avgMin   = closedT.length ? Math.round(closedT.reduce((s,t)=>s+t.responseMin,0)/closedT.length) : null;
+  const avgStr   = avgMin===null ? '—' : fmtResponse(avgMin);
+  const prod30   = productsLast30().length;
+  const doneCards= (perfData.board.done||[]).length;
+
   const cards = [
-    { label:'Workflows', value: allFlows.length,  icon:'📋', color:'var(--acc)' },
-    { label:'Totaal nodes', value: totalNodes,     icon:'⬡',  color:'var(--teal)' },
-    { label:'Verbindingen', value: totalEdges,     icon:'↗',  color:'var(--green)' },
-    { label:'Gem. nodes/flow', value: allFlows.length ? Math.round(totalNodes/allFlows.length) : 0, icon:'📐', color:'var(--amber)' }
+    { label:'Gem. response tijd', value:avgStr,         icon:'⏱', color:'var(--acc)',   sub:closedT.length+' gesloten ticket'+(closedT.length!==1?'s':'') },
+    { label:'Producten (30 dgn)', value:prod30,          icon:'📦', color:'var(--green)', sub:perfData.products.length+' totaal gepusht' },
+    { label:'Open tickets',       value:openT.length,    icon:'🎫', color:'var(--amber)', sub:'wachten op actie' },
+    { label:'Taken klaar',        value:doneCards,        icon:'✅', color:'var(--teal)',  sub:'van het taakoverzicht' },
   ];
   document.getElementById('perfStats').innerHTML = cards.map(c=>`
-    <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r-lg);padding:20px 18px;">
-      <div style="font-size:22px;margin-bottom:8px;">${c.icon}</div>
-      <div style="font-size:28px;font-weight:700;color:${c.color};letter-spacing:-1px;">${c.value}</div>
-      <div style="font-size:11px;color:var(--t2);margin-top:4px;">${c.label}</div>
+    <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r-lg);padding:18px 16px;">
+      <div style="font-size:18px;margin-bottom:10px;">${c.icon}</div>
+      <div style="font-size:26px;font-weight:700;color:${c.color};letter-spacing:-1px;">${c.value}</div>
+      <div style="font-size:11px;color:var(--t1);margin-top:4px;font-weight:500;">${c.label}</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:2px;">${c.sub}</div>
     </div>`).join('');
 }
+
+function renderTicketList(){
+  const el=document.getElementById('ticketList'); if(!el) return;
+  if(!perfData.tickets.length){ el.innerHTML='<div class="perf-empty">Nog geen tickets — voeg er een toe ↑</div>'; return; }
+  el.innerHTML = perfData.tickets.slice(0,30).map(t=>`
+    <div class="perf-row">
+      <div style="flex:1;min-width:0;">
+        <div class="perf-row-title">${escHtml(t.title)}</div>
+        <div class="perf-row-meta">${fmtDate(t.date)}${t.responseMin?' · '+fmtResponse(t.responseMin):''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+        <span class="perf-badge ${t.status==='open'?'badge-open':'badge-closed'}" onclick="toggleTicketStatus('${t.id}')" style="cursor:pointer;" title="Klik om status te wisselen">${t.status==='open'?'Open':'Klaar'}</span>
+        <button class="perf-row-del" onclick="deleteTicket('${t.id}')" title="Verwijderen">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderProductList(){
+  const el=document.getElementById('productList'); if(!el) return;
+  if(!perfData.products.length){ el.innerHTML='<div class="perf-empty">Nog geen producten — voeg er een toe ↑</div>'; return; }
+  const cutoff = Date.now()-30*24*60*60*1000;
+  el.innerHTML = perfData.products.slice(0,30).map(p=>{
+    const rec = new Date(p.date).getTime()>cutoff;
+    return `
+    <div class="perf-row">
+      <div style="flex:1;min-width:0;">
+        <div class="perf-row-title">${escHtml(p.name)}</div>
+        <div class="perf-row-meta">${fmtDate(p.date)}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+        <span class="perf-badge ${rec?'badge-recent':'badge-old'}">${rec?'30d':'Ouder'}</span>
+        <button class="perf-row-del" onclick="deleteProduct('${p.id}')" title="Verwijderen">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderNotesList(){
+  const el=document.getElementById('notesList'); if(!el) return;
+  if(!perfData.notes.length){ el.innerHTML='<div class="perf-empty" style="grid-column:1/-1;">Nog geen notities — klik op "+ Notitie"</div>'; return; }
+  el.innerHTML = [...perfData.notes].reverse().map(n=>{
+    const bg=NOTE_BG[n.colorIdx%NOTE_BG.length], tc=NOTE_TC[n.colorIdx%NOTE_TC.length], bd=NOTE_BD[n.colorIdx%NOTE_BD.length];
+    return `
+    <div class="note-card" style="background:${bg};border-color:${bd};" ondblclick="editNote('${n.id}')" title="Dubbelklik om te bewerken">
+      <div class="note-text" style="color:${tc};">${escHtml(n.text).replace(/\n/g,'<br>')}</div>
+      <div class="note-footer">
+        <span style="color:${tc};opacity:0.5;font-size:9px;font-family:'Geist Mono',monospace;">${fmtDate(n.createdAt)}</span>
+        <button class="note-del" onclick="event.stopPropagation();deleteNote('${n.id}')" style="color:${tc};">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderKanban(){
+  const el=document.getElementById('kanbanBoard'); if(!el) return;
+  const COLS = [
+    { id:'todo',  label:'📋 Te doen', topColor:'var(--b3)',           next:'doing', nextLabel:'Bezig →' },
+    { id:'doing', label:'⚡ Bezig',   topColor:'var(--amber-border)',  next:'done',  nextLabel:'Klaar →', prev:'todo',  prevLabel:'← Te doen' },
+    { id:'done',  label:'✅ Klaar',   topColor:'var(--green-border)',                                     prev:'doing', prevLabel:'← Bezig' },
+  ];
+  el.innerHTML = COLS.map(col=>{
+    const cards = perfData.board[col.id]||[];
+    return `
+    <div class="kanban-col">
+      <div class="kanban-col-header" style="border-top:2px solid ${col.topColor};">
+        <span class="kanban-col-title">${col.label}</span>
+        <span class="kanban-count">${cards.length}</span>
+      </div>
+      <div class="kanban-cards">
+        ${cards.length ? cards.map(c=>`
+          <div class="kanban-card">
+            <div class="kanban-card-title">${escHtml(c.title)}</div>
+            ${c.assignee?`<div class="kanban-card-assignee">👤 ${escHtml(c.assignee)}</div>`:''}
+            <div class="kanban-card-actions">
+              ${col.prev?`<button class="kanban-mv-btn" onclick="moveBoardCard('${c.id}','${col.id}','${col.prev}')">${col.prevLabel}</button>`:''}
+              ${col.next?`<button class="kanban-mv-btn" onclick="moveBoardCard('${c.id}','${col.id}','${col.next}')">${col.nextLabel}</button>`:''}
+              <button class="kanban-del-btn" onclick="deleteBoardCard('${c.id}','${col.id}')" title="Verwijderen">✕</button>
+            </div>
+          </div>`).join('')
+        : `<div class="kanban-empty">Leeg</div>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPerfView(){
+  renderPerfStats();
+  renderTicketList();
+  renderProductList();
+  renderNotesList();
+  renderKanban();
+}
+
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ── INITIAL DATA ─────────────────────────────────────────────────────────
 function makeId(prefix){ return prefix + '_' + (nodeIdCounter++); }
@@ -1442,6 +1908,7 @@ function saveAll(){
   showHint('Opgeslagen ✓');
 }
 function loadStorage(){
+  loadPerfData();
   try{
     const d = localStorage.getItem('zelesta_flows_v3');
     if(d) flows = JSON.parse(d);
