@@ -802,8 +802,9 @@ body {
 
 /* ── PERFORMANCE DASHBOARD ───────────────────────────────────────────── */
 
-/* Hide workflow toolbar when perf mode is active */
-.main.perf-mode .toolbar { display: none; }
+/* Hide workflow toolbar AND canvas when perf mode is active */
+.main.perf-mode .toolbar    { display: none; }
+.main.perf-mode .canvas-wrap { display: none; }
 
 /* Own top bar */
 .perf-topbar {
