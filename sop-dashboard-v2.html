@@ -1252,6 +1252,45 @@ const INIT_FLOW_3 = {
   ]
 };
 
+const INIT_FLOW_4 = {
+  id:'preorder_activeren', name:'Pre-order activeren', owner:'E-commerce', version:'v2.0', color:'teal',
+  nodes:[
+    {id:'n1',  x:200, y:100,  color:'blue',  title:'Trigger',          label:'Dagelijkse check (09:00)',          desc:'Controleer dagelijks om 09:00 (en 21:00) alle actieve pre-order producten in NL en DE. Doorloop de checklist voor alle actieve dekbedden en kussenslopen.',                                                                                                   footer:'trigger → start'},
+    {id:'n2',  x:200, y:280,  color:'blue',  title:'Stap 1 — Monta',   label:'Inbound forecast controleren',      desc:'Ga naar Monta → Stock → Products. Zoek product via SKU. Klik op "View product details" → "View inbound forecast". Controleer per variant: voorraad = 0 in Shopify, inbound binnen 3 weken, status niet "Nothing received yet". Noteer: SKU, verwacht aantal, inbound datum.',  footer:'monta → forecast'},
+    {id:'n3',  x:200, y:460,  color:'red',   title:'Let op',            label:'Nothing received yet = overslaan',  desc:'Varianten met status "Nothing received yet" altijd overslaan — er is nog geen bevestigde levering. Geen actie uitvoeren voor deze variant.',                                                                                                                          footer:'skip → geen actie'},
+    {id:'n4',  x:200, y:640,  color:'blue',  title:'Stap 2 — Datum',   label:'Leveringsdatum bepalen',             desc:'Gebruik Expected delivery date uit Monta. Pas de regel toe: ma t/m wo → maandag van diezelfde week. Do of vr → maandag van de week erna. Gebruik altijd alleen de maandagdatum — nooit extra tekst zoals "(volgende week)".',                                     footer:'monta datum → weekdag'},
+    {id:'n5',  x:200, y:820,  color:'amber', title:'Beslissing',        label:'Inbound ma–wo of do–vr?',           desc:'Ma t/m wo: PRE-ORDER tekst met maandag van diezelfde week. Do of vr: PRE-ORDER tekst met maandag van de week erna. NL: "Levering: in de week van [dag maand]". DE: "Lieferung in der Woche vom [Tag]. [Monat]".',                                                 footer:'dag → week bepalen'},
+    {id:'n6',  x:200, y:1000, color:'blue',  title:'Stap 3 — Limiet',  label:'Pre-order limiet berekenen',        desc:'Situatie A (geen volgende levering binnen 3 weken): limiet = 90% van verwachte inbound. Situatie B (volgende levering wél binnen 3 weken): limiet = 100%. Noteer het berekende limiet in de centrale pre-order overzichtslijst.',                                  footer:'forecast → limiet %'},
+    {id:'n7',  x:200, y:1180, color:'amber', title:'Beslissing',        label:'Volgende levering ≤ 3 weken?',      desc:'Geen volgende levering binnen 3 weken → limiet = 90% van forecast. Volgende levering wél binnen 3 weken → limiet = 100% van forecast. De volgende levering dekt het risico op tekort af.',                                                                       footer:'90% of 100%'},
+    {id:'n8',  x:200, y:1360, color:'teal',  title:'Stap 4 — Shopify', label:'Pre-order activeren NL + DE',       desc:'Inventory → Bulk edit → kolommen toevoegen: Continue selling when out of stock, pre-order-text, pre-order. Vul in: Continue selling ✓, custom.pre_order = True, pre-order tekst met exacte HTML <b>PRE-ORDER</b> + leverweek. Klik Save. Controleer live of banner zichtbaar is. Voeg toe aan centrale lijst.',  footer:'shopify NL + DE → actief'},
+    {id:'n9',  x:200, y:1540, color:'red',   title:'Let op',            label:'Altijd NL én DE tegelijk',          desc:'Vergeet nooit de tweede store. Altijd NL en DE tegelijk updaten. Continue selling + custom.pre_order altijd samen instellen. Pre-order tekst zonder <b>-tags is fout — altijd exacte HTML gebruiken.',                                                            footer:'sync beide stores'},
+    {id:'n10', x:200, y:1720, color:'blue',  title:'Stap 5 — Uitzetten','label':'Pre-order dagelijks controleren', desc:'Zet pre-order uit als: 90% van forecast verkocht (geen volgende levering), 100% verkocht (volgende levering wel aanwezig), of voorraad fysiek ontvangen in Monta. Bulk edit: Continue selling uitvinken, custom.pre_order = False, tekstveld leeg. Verwijder uit centrale lijst.',  footer:'limiet bereikt → deactiveren'},
+    {id:'n11', x:200, y:1900, color:'amber', title:'Stap 6 — Datum',   label:'Afwijkende inbound datum',           desc:'Als inbound datum in Monta wijzigt: herbereken leveringsdatum op basis van nieuwe datum (zie stap 2). Update pre-order tekst in Shopify NL én DE. Update de centrale pre-order overzichtslijst. Altijd beide stores tegelijk.',                                      footer:'datum gewijzigd → update'},
+    {id:'n12', x:200, y:2080, color:'green', title:'Stap 7 — Lijst',   label:'Centrale lijst bijhouden',           desc:'Bewaar per actief product: SKU, naam, markt, leverweek, limiet, activatiedatum, status. Gebruik bij elke dagelijkse check om limieten te bewaken (90%/100% bereikt?) en datumwijzigingen te signaleren.',                                                         footer:'actief → lijst bijhouden'}
+  ],
+  edges:[
+    {id:'e1',  from:'n1',  to:'n2',  color:'#4a7cf8', label:'check starten'},
+    {id:'e2',  from:'n2',  to:'n3',  color:'#e83030', label:'niets ontvangen'},
+    {id:'e3',  from:'n2',  to:'n4',  color:'#4a7cf8', label:'variant ok'},
+    {id:'e4',  from:'n4',  to:'n5',  color:'#4a7cf8', label:'datum bepalen'},
+    {id:'e5',  from:'n5',  to:'n6',  color:'#4a7cf8', label:'datum vastgesteld'},
+    {id:'e6',  from:'n6',  to:'n7',  color:'#4a7cf8', label:'limiet berekenen'},
+    {id:'e7',  from:'n7',  to:'n8',  color:'#12b09e', label:'limiet ok'},
+    {id:'e8',  from:'n8',  to:'n9',  color:'#e83030', label:'check stores'},
+    {id:'e9',  from:'n8',  to:'n10', color:'#4a7cf8', label:'dagelijks bewaken'},
+    {id:'e10', from:'n8',  to:'n12', color:'#1ab84e', label:'toevoegen lijst'},
+    {id:'e11', from:'n10', to:'n11', color:'#e8982a', label:'datum gewijzigd'},
+    {id:'e12', from:'n11', to:'n12', color:'#1ab84e', label:'bijwerken'}
+  ],
+  legend:[
+    {color:'#4a7cf8',label:'Controle & data'},
+    {color:'#12b09e',label:'Shopify actie'},
+    {color:'#e8982a',label:'Beslissing / datum'},
+    {color:'#e83030',label:'Waarschuwing'},
+    {color:'#1ab84e',label:'Afronden'}
+  ]
+};
+
 // ── STORAGE ──────────────────────────────────────────────────────────────
 function saveAll(){
   try{ localStorage.setItem('zelesta_flows_v3', JSON.stringify(flows)); }catch(e){}
@@ -1264,15 +1303,17 @@ function loadStorage(){
   }catch(e){}
   if(!Object.keys(flows).length){
     flows = {
-      'prijzen':          JSON.parse(JSON.stringify(INIT_FLOW)),
-      'product-aanmaken': JSON.parse(JSON.stringify(INIT_FLOW_2)),
-      'product-live':     JSON.parse(JSON.stringify(INIT_FLOW_3))
+      'prijzen':              JSON.parse(JSON.stringify(INIT_FLOW)),
+      'product-aanmaken':     JSON.parse(JSON.stringify(INIT_FLOW_2)),
+      'product-live':         JSON.parse(JSON.stringify(INIT_FLOW_3)),
+      'preorder_activeren':   JSON.parse(JSON.stringify(INIT_FLOW_4))
     };
   }
   // Migration: inject missing seed flows for existing users
   let migrated = false;
-  if(!flows['product-aanmaken']){ flows['product-aanmaken'] = JSON.parse(JSON.stringify(INIT_FLOW_2)); migrated = true; }
-  if(!flows['product-live']){     flows['product-live']     = JSON.parse(JSON.stringify(INIT_FLOW_3)); migrated = true; }
+  if(!flows['product-aanmaken']){   flows['product-aanmaken']   = JSON.parse(JSON.stringify(INIT_FLOW_2)); migrated = true; }
+  if(!flows['product-live']){       flows['product-live']       = JSON.parse(JSON.stringify(INIT_FLOW_3)); migrated = true; }
+  if(!flows['preorder_activeren']){ flows['preorder_activeren'] = JSON.parse(JSON.stringify(INIT_FLOW_4)); migrated = true; }
   if(migrated){ try{ localStorage.setItem('zelesta_flows_v3', JSON.stringify(flows)); }catch(e){} }
 }
 
