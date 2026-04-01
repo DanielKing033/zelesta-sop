@@ -801,46 +801,157 @@ body {
 #hint.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ── PERFORMANCE DASHBOARD ───────────────────────────────────────────── */
-.perf-section {
+
+/* Hide workflow toolbar when perf mode is active */
+.main.perf-mode .toolbar { display: none; }
+
+/* Own top bar */
+.perf-topbar {
+  height: 54px; flex-shrink: 0;
   background: var(--s1);
-  border: 1px solid var(--b1);
-  border-radius: var(--r-xl);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.perf-section-header {
-  display: flex;
-  align-items: center;
+  border-bottom: 1px solid var(--b0);
+  display: flex; align-items: center;
   justify-content: space-between;
+  padding: 0 20px;
 }
-.perf-section-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--t1);
-  letter-spacing: -0.1px;
+.perf-topbar-brand { display: flex; align-items: center; gap: 12px; }
+.perf-topbar-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, #152560 0%, #2a1260 100%);
+  border: 1px solid #2a3478;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+  box-shadow: 0 0 16px #4f7cff22;
 }
-.perf-form {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-bottom: 14px;
+.perf-topbar-title {
+  font-size: 14px; font-weight: 700;
+  letter-spacing: -0.4px; color: var(--t1);
+}
+.perf-topbar-sub {
+  font-size: 10px; color: var(--t3);
+  font-family: 'Geist Mono', monospace; margin-top: 1px;
+}
+.perf-back-btn {
+  background: var(--s2); border: 1px solid var(--b2);
+  border-radius: var(--r); color: var(--t2);
+  font-size: 11px; padding: 7px 14px; cursor: pointer;
+  font-family: 'Geist', sans-serif; transition: all 0.15s;
+  display: flex; align-items: center; gap: 6px; font-weight: 500;
+}
+.perf-back-btn:hover { background: var(--b1); color: var(--t1); border-color: var(--b3); }
+
+/* Body layout */
+.perf-body { flex: 1; display: flex; overflow: hidden; }
+
+/* Side nav */
+.perf-sidenav {
+  width: 172px; flex-shrink: 0;
+  background: var(--s1); border-right: 1px solid var(--b0);
+  padding: 12px 8px; display: flex; flex-direction: column;
+  gap: 1px; overflow-y: auto;
+}
+.perf-sidenav-label {
+  font-size: 9px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--t3);
+  padding: 10px 10px 4px;
+}
+.perf-nav-btn {
+  width: 100%; display: flex; align-items: center; gap: 9px;
+  padding: 9px 10px; background: transparent;
+  border: 1px solid transparent; border-radius: var(--r);
+  color: var(--t2); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all 0.14s;
+  font-family: 'Geist', sans-serif; text-align: left;
+  white-space: nowrap;
+}
+.perf-nav-btn:hover { background: var(--s3); color: var(--t1); }
+.perf-nav-btn.active { background: var(--b1); border-color: var(--b2); color: var(--t1); }
+.perf-nav-icon { font-size: 14px; flex-shrink: 0; line-height: 1; }
+.perf-nav-badge {
+  margin-left: auto; background: var(--amber-bg);
+  color: var(--amber-t); border: 1px solid var(--amber-border);
+  font-size: 9px; font-weight: 700; padding: 1px 6px;
+  border-radius: 100px; display: none; white-space: nowrap;
+}
+.perf-nav-badge.visible { display: block; }
+
+/* Content pane */
+.perf-content {
+  flex: 1; overflow-y: auto;
+  padding: 32px 36px 80px; background: var(--bg);
+}
+.perf-content::-webkit-scrollbar { width: 4px; }
+.perf-content::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 10px; }
+
+/* Page heading */
+.perf-page-title { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; color: var(--t1); }
+.perf-page-sub   { font-size: 11px; color: var(--t3); margin-top: 4px; }
+.perf-page-head  { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+
+/* KPI grid */
+.perf-kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
+.perf-kpi-card {
+  background: var(--s1); border: 1px solid var(--b1);
+  border-radius: var(--r-lg); padding: 18px 16px;
+  transition: border-color 0.15s;
+}
+.perf-kpi-card:hover { border-color: var(--b3); }
+.perf-kpi-icon  { font-size: 18px; margin-bottom: 10px; }
+.perf-kpi-value { font-size: 28px; font-weight: 700; letter-spacing: -1.5px; margin-bottom: 2px; }
+.perf-kpi-label { font-size: 11px; color: var(--t1); font-weight: 500; }
+.perf-kpi-sub   { font-size: 10px; color: var(--t3); margin-top: 3px; }
+
+/* Summary cards */
+.perf-card {
+  background: var(--s1); border: 1px solid var(--b1);
+  border-radius: var(--r-lg); padding: 18px;
+  display: flex; flex-direction: column; gap: 0;
+}
+.perf-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; font-weight: 600; color: var(--t1);
+  padding-bottom: 12px; margin-bottom: 2px;
   border-bottom: 1px solid var(--b1);
 }
-.perf-form-row { display: flex; gap: 8px; align-items: center; }
+.perf-link-btn {
+  background: none; border: none; color: var(--acc);
+  font-size: 10px; font-family: 'Geist', sans-serif;
+  cursor: pointer; padding: 0; font-weight: 500;
+  transition: color 0.12s;
+}
+.perf-link-btn:hover { color: var(--blue-t); }
+.perf-mini-row {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 0; border-bottom: 1px solid var(--b0);
+}
+.perf-mini-row:last-child { border-bottom: none; }
+.perf-mini-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.dot-amber { background: var(--amber); box-shadow: 0 0 5px var(--amber); }
+.dot-green { background: var(--green); box-shadow: 0 0 5px var(--green); }
+.dot-blue  { background: var(--blue);  box-shadow: 0 0 5px var(--blue);  }
+.dot-teal  { background: var(--teal);  box-shadow: 0 0 5px var(--teal);  }
+.perf-mini-title { font-size: 11px; color: var(--t1); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.perf-mini-meta  { font-size: 10px; color: var(--t3); white-space: nowrap; font-family: 'Geist Mono', monospace; }
+
+/* Add forms */
+.perf-form {
+  background: var(--s1); border: 1px solid var(--b1);
+  border-radius: var(--r-lg); padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 10px;
+  margin-bottom: 16px;
+}
+.perf-form-label {
+  font-size: 9px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--t3);
+}
+.perf-form-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .perf-input {
-  background: var(--s2);
-  border: 1px solid var(--b2);
-  border-radius: var(--r);
-  color: var(--t1);
-  font-family: 'Geist', sans-serif;
-  font-size: 11px;
-  padding: 7px 10px;
-  outline: none;
-  transition: border-color 0.15s;
-  flex: 1;
-  min-width: 0;
+  background: var(--s2); border: 1px solid var(--b2);
+  border-radius: var(--r); color: var(--t1);
+  font-family: 'Geist', sans-serif; font-size: 12px;
+  padding: 8px 12px; outline: none; transition: border-color 0.15s;
+  flex: 1; min-width: 0;
 }
 .perf-input:focus { border-color: var(--acc); }
 .perf-input::placeholder { color: var(--t3); }
@@ -848,135 +959,115 @@ body {
 .perf-input[type=number]::-webkit-outer-spin-button,
 .perf-input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 .perf-btn {
-  background: var(--s2);
-  border: 1px solid var(--b2);
-  border-radius: var(--r);
-  color: var(--t2);
-  font-family: 'Geist', sans-serif;
-  font-size: 11px;
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-  flex-shrink: 0;
+  background: var(--s2); border: 1px solid var(--b2);
+  border-radius: var(--r); color: var(--t2);
+  font-family: 'Geist', sans-serif; font-size: 11px;
+  padding: 8px 14px; cursor: pointer; transition: all 0.15s;
+  white-space: nowrap; flex-shrink: 0; font-weight: 500;
 }
 .perf-btn:hover { background: var(--b1); color: var(--t1); border-color: var(--b3); }
-.perf-btn-add  { background: var(--acc); color: #fff; border-color: var(--acc); font-weight: 500; }
-.perf-btn-add:hover { background: #3d6de8; border-color: #3d6de8; }
-.perf-list {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  max-height: 220px;
-  overflow-y: auto;
+.perf-btn-primary { background: var(--acc); color: #fff; border-color: var(--acc); }
+.perf-btn-primary:hover { background: #3d6de8; border-color: #3d6de8; color: #fff; }
+
+/* List container */
+.perf-list-wrap {
+  background: var(--s1); border: 1px solid var(--b1);
+  border-radius: var(--r-lg); overflow: hidden;
 }
-.perf-list::-webkit-scrollbar { width: 3px; }
-.perf-list::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 10px; }
+.perf-list-header {
+  padding: 14px 18px; border-bottom: 1px solid var(--b1);
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; font-weight: 600; color: var(--t1);
+}
+.perf-list-body { padding: 8px; display: flex; flex-direction: column; gap: 3px; }
 .perf-row {
-  background: var(--s2);
-  border: 1px solid var(--b1);
-  border-radius: var(--r);
-  padding: 8px 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: border-color 0.15s;
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: var(--r);
+  background: var(--s2); border: 1px solid transparent;
+  transition: border-color 0.12s;
 }
-.perf-row:hover { border-color: var(--b3); }
+.perf-row:hover { border-color: var(--b2); }
+.perf-row-main { flex: 1; min-width: 0; }
 .perf-row-title { font-size: 12px; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.perf-row-meta  { font-size: 10px; color: var(--t2); margin-top: 2px; }
-.perf-row-del   {
+.perf-row-meta  { font-size: 10px; color: var(--t2); margin-top: 2px; font-family: 'Geist Mono', monospace; }
+.perf-row-del {
   background: none; border: none; color: var(--t3);
-  font-size: 11px; cursor: pointer; padding: 2px 5px;
-  border-radius: 4px; line-height: 1;
+  font-size: 12px; cursor: pointer; padding: 3px 6px;
+  border-radius: 4px; line-height: 1; flex-shrink: 0;
 }
 .perf-row-del:hover { background: var(--red-bg); color: var(--red-t); }
 .perf-badge {
-  font-size: 9px; font-weight: 600; padding: 2px 8px;
-  border-radius: 100px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;
+  font-size: 9px; font-weight: 700; padding: 2px 8px;
+  border-radius: 100px; text-transform: uppercase;
+  letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0;
 }
-.badge-open   { background: var(--amber-bg); color: var(--amber-t); border: 1px solid var(--amber-border); }
-.badge-closed { background: var(--green-bg);  color: var(--green-t);  border: 1px solid var(--green-border); }
+.badge-open   { background: var(--amber-bg); color: var(--amber-t); border: 1px solid var(--amber-border); cursor: pointer; }
+.badge-closed { background: var(--green-bg);  color: var(--green-t);  border: 1px solid var(--green-border); cursor: pointer; }
 .badge-recent { background: var(--teal-bg);   color: var(--teal-t);   border: 1px solid var(--teal-border); }
-.badge-old    { background: var(--s3);         color: var(--t3);       border: 1px solid var(--b2); }
-.perf-empty { font-size: 11px; color: var(--t3); text-align: center; padding: 16px 0; font-style: italic; }
+.badge-old    { background: var(--s3); color: var(--t3); border: 1px solid var(--b2); }
+.perf-empty   { font-size: 11px; color: var(--t3); text-align: center; padding: 24px 16px; font-style: italic; }
 
 /* Notes */
 .notes-grid {
   display: grid;
-  grid-template-columns: repeat(2,1fr);
-  gap: 10px;
-  max-height: 260px;
-  overflow-y: auto;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
 }
-.notes-grid::-webkit-scrollbar { width: 3px; }
-.notes-grid::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 10px; }
 .note-card {
-  border: 1px solid transparent;
-  border-radius: var(--r);
-  padding: 12px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-height: 80px;
-  transition: transform 0.1s;
+  border: 1px solid transparent; border-radius: var(--r-lg);
+  padding: 14px 14px 12px; cursor: pointer;
+  display: flex; flex-direction: column; gap: 8px;
+  min-height: 100px; transition: transform 0.12s, box-shadow 0.12s;
 }
-.note-card:hover { transform: translateY(-1px); }
-.note-text { font-size: 11px; line-height: 1.65; word-break: break-word; flex: 1; }
+.note-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px #00000066; }
+.note-text { font-size: 12px; line-height: 1.65; word-break: break-word; flex: 1; }
 .note-footer { display: flex; align-items: center; justify-content: space-between; }
-.note-del { background: none; border: none; cursor: pointer; font-size: 11px; padding: 0; line-height: 1; opacity: 0.5; }
+.note-del { background: none; border: none; cursor: pointer; font-size: 12px; padding: 0; line-height: 1; opacity: 0.35; }
 .note-del:hover { opacity: 1; }
 
 /* Kanban */
-.kanban-board { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
-.kanban-col   { display: flex; flex-direction: column; gap: 6px; }
+.kanban-board { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.kanban-col   { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .kanban-col-header {
-  padding: 7px 10px;
-  background: var(--s2);
-  border-radius: var(--r);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid var(--b1);
+  padding: 10px 14px; background: var(--s1);
+  border: 1px solid var(--b1); border-radius: var(--r);
+  display: flex; align-items: center; justify-content: space-between;
 }
 .kanban-col-title { font-size: 11px; font-weight: 600; color: var(--t1); }
 .kanban-count {
-  font-size: 9px; color: var(--t2);
-  background: var(--s3); padding: 1px 7px;
-  border-radius: 100px;
+  font-size: 9px; color: var(--t2); background: var(--s3);
+  padding: 2px 8px; border-radius: 100px; font-family: 'Geist Mono', monospace;
 }
-.kanban-cards { display: flex; flex-direction: column; gap: 5px; min-height: 32px; }
+.kanban-cards { display: flex; flex-direction: column; gap: 7px; min-height: 40px; }
 .kanban-card {
-  background: var(--s2);
-  border: 1px solid var(--b2);
-  border-radius: var(--r);
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  transition: border-color 0.15s;
+  background: var(--s1); border: 1px solid var(--b2);
+  border-radius: var(--r-lg); padding: 13px 14px;
+  display: flex; flex-direction: column; gap: 5px;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.kanban-card:hover { border-color: var(--b3); }
-.kanban-card-title    { font-size: 11px; color: var(--t1); line-height: 1.45; }
+.kanban-card:hover { border-color: var(--b3); box-shadow: var(--shadow); }
+.kanban-card-title    { font-size: 12px; color: var(--t1); line-height: 1.45; font-weight: 500; }
 .kanban-card-assignee { font-size: 10px; color: var(--t2); }
-.kanban-card-actions  { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; align-items: center; }
+.kanban-card-actions  { display: flex; gap: 5px; margin-top: 5px; align-items: center; flex-wrap: wrap; }
 .kanban-mv-btn {
-  background: var(--s3); border: 1px solid var(--b2);
-  border-radius: 4px; color: var(--t2);
-  font-size: 9px; padding: 2px 7px;
-  cursor: pointer; font-family: 'Geist', sans-serif;
+  background: var(--s2); border: 1px solid var(--b2);
+  border-radius: 5px; color: var(--t2);
+  font-size: 10px; padding: 3px 9px; cursor: pointer;
+  font-family: 'Geist', sans-serif; font-weight: 500;
   transition: all 0.12s;
 }
-.kanban-mv-btn:hover { background: var(--b2); color: var(--t1); }
+.kanban-mv-btn:hover { background: var(--b2); color: var(--t1); border-color: var(--b3); }
 .kanban-del-btn {
-  background: none; border: none;
-  color: var(--t3); font-size: 10px;
-  cursor: pointer; margin-left: auto;
-  padding: 2px 5px; border-radius: 4px; line-height: 1;
+  background: none; border: none; color: var(--t3);
+  font-size: 11px; cursor: pointer; margin-left: auto;
+  padding: 3px 6px; border-radius: 4px; line-height: 1;
 }
 .kanban-del-btn:hover { background: var(--red-bg); color: var(--red-t); }
-.kanban-empty { font-size: 10px; color: var(--t3); text-align: center; padding: 10px; font-style: italic; }
+.kanban-empty {
+  font-size: 11px; color: var(--t3); text-align: center;
+  padding: 20px; font-style: italic;
+  border: 1px dashed var(--b2); border-radius: var(--r);
+}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1121,84 +1212,54 @@ body {
     </div>
 
     <!-- PERFORMANCE DASHBOARD VIEW -->
-    <div id="perfView" style="display:none; flex:1; overflow-y:auto; padding:28px 32px 60px; flex-direction:column; gap:20px; background:var(--bg);">
+    <div id="perfView" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
 
-      <!-- Header -->
-      <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:4px;">
-        <div>
-          <div style="font-size:19px; font-weight:700; letter-spacing:-0.5px; color:var(--t1);">Performance Dashboard</div>
-          <div style="font-size:11px; color:var(--t2); margin-top:4px;">Team statistieken · Producten · Tickets · Notities · Taakoverzicht</div>
+      <!-- Own top bar — replaces workflow toolbar -->
+      <div class="perf-topbar">
+        <div class="perf-topbar-brand">
+          <div class="perf-topbar-icon">📊</div>
+          <div>
+            <div class="perf-topbar-title">Performance Dashboard</div>
+            <div class="perf-topbar-sub" id="perfTopDate"></div>
+          </div>
         </div>
-        <button onclick="showWorkflowsView()" style="background:var(--s2); border:1px solid var(--b2); border-radius:var(--r); color:var(--t2); font-size:11px; padding:6px 14px; cursor:pointer; font-family:'Geist',sans-serif; display:flex; align-items:center; gap:6px; flex-shrink:0; transition:all 0.15s;" onmouseover="this.style.background='var(--b1)';this.style.color='var(--t1)'" onmouseout="this.style.background='var(--s2)';this.style.color='var(--t2)'">
+        <button class="perf-back-btn" onclick="showWorkflowsView()">
           <svg viewBox="0 0 16 16" fill="none" width="11" height="11"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Workflows
+          Terug naar Workflows
         </button>
       </div>
 
-      <!-- KPI Cards -->
-      <div id="perfStats" style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px;"></div>
+      <!-- Body: side nav + content -->
+      <div class="perf-body">
 
-      <!-- Tickets + Products -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <!-- Side navigation -->
+        <nav class="perf-sidenav">
+          <div class="perf-sidenav-label">Overzicht</div>
+          <button class="perf-nav-btn active" id="pnav-overview" onclick="switchPerfSection('overview')">
+            <span class="perf-nav-icon">📊</span>Dashboard
+          </button>
 
-        <!-- Ticket response time -->
-        <div class="perf-section">
-          <div class="perf-section-header">
-            <div class="perf-section-title">🎫 Ticket Response Times</div>
-          </div>
-          <div class="perf-form">
-            <input class="perf-input" id="ticketTitle" placeholder="Ticket omschrijving…"/>
-            <div class="perf-form-row">
-              <input class="perf-input" id="ticketHours" type="number" placeholder="Uur" min="0" style="width:64px; flex:none;"/>
-              <input class="perf-input" id="ticketMins"  type="number" placeholder="Min" min="0" max="59" style="width:64px; flex:none;"/>
-              <select class="perf-input" id="ticketStatus" style="flex:1;">
-                <option value="open">Open</option>
-                <option value="closed">Gesloten</option>
-              </select>
-              <button class="perf-btn perf-btn-add" onclick="addTicket()">+ Toevoegen</button>
-            </div>
-          </div>
-          <div id="ticketList" class="perf-list"></div>
-        </div>
+          <div class="perf-sidenav-label">Registratie</div>
+          <button class="perf-nav-btn" id="pnav-tickets" onclick="switchPerfSection('tickets')">
+            <span class="perf-nav-icon">🎫</span>Tickets
+            <span class="perf-nav-badge" id="pnav-tickets-badge"></span>
+          </button>
+          <button class="perf-nav-btn" id="pnav-products" onclick="switchPerfSection('products')">
+            <span class="perf-nav-icon">📦</span>Producten
+          </button>
 
-        <!-- Products pushed -->
-        <div class="perf-section">
-          <div class="perf-section-header">
-            <div class="perf-section-title">📦 Producten Online Gepusht</div>
-          </div>
-          <div class="perf-form">
-            <input class="perf-input" id="productName" placeholder="Productnaam of SKU…"/>
-            <div class="perf-form-row">
-              <input class="perf-input" id="productDate" type="date" style="flex:1;"/>
-              <button class="perf-btn perf-btn-add" onclick="addProduct()">+ Toevoegen</button>
-            </div>
-          </div>
-          <div id="productList" class="perf-list"></div>
-        </div>
+          <div class="perf-sidenav-label">Werkbeheer</div>
+          <button class="perf-nav-btn" id="pnav-board" onclick="switchPerfSection('board')">
+            <span class="perf-nav-icon">📋</span>Taakoverzicht
+          </button>
+          <button class="perf-nav-btn" id="pnav-notes" onclick="switchPerfSection('notes')">
+            <span class="perf-nav-icon">📝</span>Notities
+          </button>
+        </nav>
+
+        <!-- Dynamic content pane -->
+        <div class="perf-content" id="perfContent"></div>
       </div>
-
-      <!-- Notes + Kanban -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-
-        <!-- Sticky notes -->
-        <div class="perf-section">
-          <div class="perf-section-header">
-            <div class="perf-section-title">📝 Notities</div>
-            <button class="perf-btn" onclick="addNote()">+ Notitie</button>
-          </div>
-          <div id="notesList" class="notes-grid"></div>
-        </div>
-
-        <!-- Mini kanban board -->
-        <div class="perf-section">
-          <div class="perf-section-header">
-            <div class="perf-section-title">📋 Taakoverzicht</div>
-            <button class="perf-btn" onclick="addBoardCard()">+ Taak</button>
-          </div>
-          <div class="kanban-board" id="kanbanBoard"></div>
-        </div>
-      </div>
-
     </div>
 
     <!-- NODE PANEL -->
@@ -1466,23 +1527,21 @@ function toggleWorkflowsSection(){
 }
 
 function showPerfDashboard(){
-  document.getElementById('canvasHolder').style.display  = 'none';
-  document.getElementById('emptyState').style.display    = 'none';
-  document.getElementById('bottomBar').style.display     = 'none';
-  document.getElementById('perfView').style.display      = 'flex';
-  document.getElementById('tbTitle').textContent = 'Performance Dashboard';
-  document.getElementById('tbMeta').textContent  = '';
+  document.getElementById('canvasHolder').style.display = 'none';
+  document.getElementById('emptyState').style.display   = 'none';
+  document.getElementById('bottomBar').style.display    = 'none';
+  document.getElementById('perfView').style.display     = 'flex';
+  // Hide workflow toolbar via class on .main
+  document.querySelector('.main').classList.add('perf-mode');
   document.getElementById('btnPerf').classList.add('active');
   activeFlowId = null;
   renderSidebar();
-  // Set default date to today
-  const pd = document.getElementById('productDate');
-  if(pd && !pd._defaultSet){ pd.value = new Date().toISOString().split('T')[0]; pd._defaultSet=true; }
   renderPerfView();
 }
 
 function showWorkflowsView(){
   document.getElementById('perfView').style.display = 'none';
+  document.querySelector('.main').classList.remove('perf-mode');
   document.getElementById('btnPerf').classList.remove('active');
   document.getElementById('tbTitle').textContent = 'Selecteer een workflow';
   document.getElementById('tbMeta').textContent  = '';
@@ -1491,13 +1550,14 @@ function showWorkflowsView(){
 
 // ── PERFORMANCE DATA ──────────────────────────────────────────────────────
 let perfData = { tickets:[], products:[], notes:[], board:{todo:[],doing:[],done:[]} };
+let activePerfSection = 'overview';
 
 function loadPerfData(){
   try{
     const raw = localStorage.getItem('zelesta_perf_v1');
     if(raw){
-      const parsed = JSON.parse(raw);
-      perfData = Object.assign({ tickets:[], products:[], notes:[], board:{todo:[],doing:[],done:[]} }, parsed);
+      const p = JSON.parse(raw);
+      perfData = Object.assign({ tickets:[], products:[], notes:[], board:{todo:[],doing:[],done:[]} }, p);
       if(!perfData.board) perfData.board = {todo:[],doing:[],done:[]};
     }
   }catch(e){}
@@ -1512,230 +1572,365 @@ function perfId(){ return 'p' + Date.now().toString(36) + Math.random().toString
 function fmtDate(iso){
   try{ return new Date(iso).toLocaleDateString('nl-NL',{day:'2-digit',month:'short',year:'numeric'}); }catch(e){ return ''; }
 }
+function fmtDateLong(){ return new Date().toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long',year:'numeric'}); }
 
 function fmtResponse(mins){
   if(!mins && mins!==0) return '—';
   if(mins===0) return '0m';
   if(mins<60) return mins+'m';
-  const h = Math.floor(mins/60), m = mins%60;
+  const h=Math.floor(mins/60), m=mins%60;
   return h+'u'+(m?` ${m}m`:'');
+}
+
+// ── SECTION SWITCH ────────────────────────────────────────────────────────
+function switchPerfSection(section){
+  activePerfSection = section;
+  ['overview','tickets','products','board','notes'].forEach(s=>{
+    const btn = document.getElementById('pnav-'+s);
+    if(btn) btn.classList.toggle('active', s===section);
+  });
+  // Update open-ticket badge
+  const openCnt = perfData.tickets.filter(t=>t.status==='open').length;
+  const badge = document.getElementById('pnav-tickets-badge');
+  if(badge){ badge.textContent=openCnt; badge.classList.toggle('visible', openCnt>0); }
+  // Render content
+  const el = document.getElementById('perfContent'); if(!el) return;
+  if(section==='overview')  el.innerHTML = perfOverviewHTML();
+  if(section==='tickets')   el.innerHTML = perfTicketsHTML();
+  if(section==='products')  el.innerHTML = perfProductsHTML();
+  if(section==='board')     el.innerHTML = perfBoardHTML();
+  if(section==='notes')     el.innerHTML = perfNotesHTML();
+  // Post-render fixes
+  if(section==='products'){
+    const pd=document.getElementById('productDate');
+    if(pd&&!pd.value) pd.value=new Date().toISOString().split('T')[0];
+  }
+  if(section==='tickets'){
+    const ti=document.getElementById('ticketTitle');
+    if(ti) ti.focus();
+  }
+}
+
+// ── RENDER COORDINATOR ───────────────────────────────────────────────────
+function renderPerfView(){
+  const dateEl = document.getElementById('perfTopDate');
+  if(dateEl) dateEl.textContent = fmtDateLong();
+  switchPerfSection(activePerfSection);
+}
+// Legacy alias (called in showPerfDashboard path)
+function renderPerfStats(){ renderPerfView(); }
+
+// ── HTML SECTION BUILDERS ─────────────────────────────────────────────────
+function kpiCard(icon, value, label, color, sub){
+  return `<div class="perf-kpi-card">
+    <div class="perf-kpi-icon">${icon}</div>
+    <div class="perf-kpi-value" style="color:${color};">${value}</div>
+    <div class="perf-kpi-label">${label}</div>
+    <div class="perf-kpi-sub">${sub}</div>
+  </div>`;
+}
+
+function perfOverviewHTML(){
+  const closedT = perfData.tickets.filter(t=>t.status==='closed');
+  const openT   = perfData.tickets.filter(t=>t.status==='open');
+  const avgMin  = closedT.length ? Math.round(closedT.reduce((s,t)=>s+t.responseMin,0)/closedT.length) : null;
+  const prod30  = productsLast30();
+  const todo=(perfData.board.todo||[]).length, doing=(perfData.board.doing||[]).length, done=(perfData.board.done||[]).length;
+  const tRecent = perfData.tickets.slice(0,6);
+  const pRecent = perfData.products.slice(0,6);
+  return `
+    <div style="max-width:960px;">
+      <div class="perf-page-head">
+        <div>
+          <div class="perf-page-title">Dashboard</div>
+          <div class="perf-page-sub">${fmtDateLong()}</div>
+        </div>
+      </div>
+      <div class="perf-kpi-grid">
+        ${kpiCard('⏱', avgMin===null?'—':fmtResponse(avgMin), 'Gem. response tijd', 'var(--acc)',   closedT.length+' ticket'+(closedT.length!==1?'s':'')+' gesloten')}
+        ${kpiCard('📦', prod30.length,                          'Producten (30 dgn)', 'var(--green)', perfData.products.length+' totaal gepusht')}
+        ${kpiCard('🎫', openT.length,                           'Open tickets',       'var(--amber)', 'wachten op actie')}
+        ${kpiCard('📋', `<span style="font-size:18px;">${todo}</span><span style="font-size:14px;color:var(--t2);"> / ${doing} / ${done}</span>`, 'Taken — to do / bezig / klaar', 'var(--teal)', 'klik "Taakoverzicht" voor details')}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="perf-card">
+          <div class="perf-card-header">
+            Recente tickets
+            <button class="perf-link-btn" onclick="switchPerfSection('tickets')">Alle tickets →</button>
+          </div>
+          ${tRecent.length ? tRecent.map(t=>`
+            <div class="perf-mini-row">
+              <span class="perf-mini-dot ${t.status==='open'?'dot-amber':'dot-green'}"></span>
+              <span class="perf-mini-title">${escHtml(t.title)}</span>
+              <span class="perf-mini-meta">${t.responseMin?fmtResponse(t.responseMin):'—'}</span>
+            </div>`).join('') : '<div class="perf-empty">Nog geen tickets geregistreerd</div>'}
+        </div>
+        <div class="perf-card">
+          <div class="perf-card-header">
+            Recente producten
+            <button class="perf-link-btn" onclick="switchPerfSection('products')">Alle producten →</button>
+          </div>
+          ${pRecent.length ? pRecent.map(p=>`
+            <div class="perf-mini-row">
+              <span class="perf-mini-dot dot-blue"></span>
+              <span class="perf-mini-title">${escHtml(p.name)}</span>
+              <span class="perf-mini-meta">${fmtDate(p.date)}</span>
+            </div>`).join('') : '<div class="perf-empty">Nog geen producten geregistreerd</div>'}
+        </div>
+      </div>
+    </div>`;
+}
+
+function perfTicketsHTML(){
+  return `
+    <div style="max-width:820px;">
+      <div class="perf-page-head">
+        <div>
+          <div class="perf-page-title">Tickets</div>
+          <div class="perf-page-sub">Log en beheer ticket response tijden</div>
+        </div>
+      </div>
+      <div class="perf-form">
+        <div class="perf-form-label">Nieuw ticket</div>
+        <input class="perf-input" id="ticketTitle" placeholder="Ticket omschrijving…" onkeydown="if(event.key==='Enter')addTicket()"/>
+        <div class="perf-form-row">
+          <input class="perf-input" id="ticketHours" type="number" placeholder="Uren" min="0" style="width:88px;flex:none;"/>
+          <input class="perf-input" id="ticketMins"  type="number" placeholder="Min"  min="0" max="59" style="width:88px;flex:none;"/>
+          <select class="perf-input" id="ticketStatus">
+            <option value="open">Status: Open</option>
+            <option value="closed">Status: Gesloten</option>
+          </select>
+          <button class="perf-btn perf-btn-primary" onclick="addTicket()">+ Toevoegen</button>
+        </div>
+      </div>
+      <div class="perf-list-wrap">
+        <div class="perf-list-header">
+          Alle tickets
+          <span style="font-size:10px;color:var(--t3);font-weight:400;">
+            ${perfData.tickets.filter(t=>t.status==='open').length} open ·
+            ${perfData.tickets.filter(t=>t.status==='closed').length} gesloten
+          </span>
+        </div>
+        <div class="perf-list-body">
+          ${perfData.tickets.length ? perfData.tickets.map(t=>`
+            <div class="perf-row">
+              <div class="perf-row-main">
+                <div class="perf-row-title">${escHtml(t.title)}</div>
+                <div class="perf-row-meta">${fmtDate(t.date)}${t.responseMin?' · '+fmtResponse(t.responseMin):''}</div>
+              </div>
+              <span class="perf-badge ${t.status==='open'?'badge-open':'badge-closed'}"
+                onclick="toggleTicketStatus('${t.id}')" title="Klik om te wisselen">
+                ${t.status==='open'?'Open':'Gesloten'}
+              </span>
+              <button class="perf-row-del" onclick="deleteTicket('${t.id}')" title="Verwijderen">✕</button>
+            </div>`).join('')
+          : '<div class="perf-empty">Nog geen tickets — voeg er één toe hierboven</div>'}
+        </div>
+      </div>
+    </div>`;
+}
+
+function perfProductsHTML(){
+  const cutoff = Date.now()-30*24*60*60*1000;
+  return `
+    <div style="max-width:820px;">
+      <div class="perf-page-head">
+        <div>
+          <div class="perf-page-title">Producten</div>
+          <div class="perf-page-sub">Bijhouden welke producten live zijn gezet</div>
+        </div>
+        <div style="background:var(--teal-bg);border:1px solid var(--teal-border);border-radius:var(--r-lg);padding:10px 18px;text-align:center;flex-shrink:0;">
+          <div style="font-size:24px;font-weight:700;color:var(--teal-t);letter-spacing:-1px;">${productsLast30().length}</div>
+          <div style="font-size:10px;color:var(--teal-t);opacity:0.7;margin-top:1px;">afgelopen 30 dgn</div>
+        </div>
+      </div>
+      <div class="perf-form">
+        <div class="perf-form-label">Product toevoegen</div>
+        <div class="perf-form-row">
+          <input class="perf-input" id="productName" placeholder="Productnaam of SKU…" onkeydown="if(event.key==='Enter')addProduct()"/>
+          <input class="perf-input" id="productDate" type="date" style="width:160px;flex:none;"/>
+          <button class="perf-btn perf-btn-primary" onclick="addProduct()">+ Toevoegen</button>
+        </div>
+      </div>
+      <div class="perf-list-wrap">
+        <div class="perf-list-header">
+          Alle producten
+          <span style="font-size:10px;color:var(--t3);font-weight:400;">${perfData.products.length} totaal</span>
+        </div>
+        <div class="perf-list-body">
+          ${perfData.products.length ? perfData.products.map(p=>{
+            const rec=new Date(p.date).getTime()>cutoff;
+            return `
+            <div class="perf-row">
+              <div class="perf-row-main">
+                <div class="perf-row-title">${escHtml(p.name)}</div>
+                <div class="perf-row-meta">${fmtDate(p.date)}</div>
+              </div>
+              <span class="perf-badge ${rec?'badge-recent':'badge-old'}">${rec?'30 dgn':'Ouder'}</span>
+              <button class="perf-row-del" onclick="deleteProduct('${p.id}')" title="Verwijderen">✕</button>
+            </div>`;}).join('')
+          : '<div class="perf-empty">Nog geen producten — voeg er één toe hierboven</div>'}
+        </div>
+      </div>
+    </div>`;
+}
+
+function perfBoardHTML(){
+  const COLS=[
+    {id:'todo',  label:'Te doen', accent:'var(--b3)',           next:'doing',nextLabel:'Bezig →'},
+    {id:'doing', label:'Bezig',   accent:'var(--amber-border)', next:'done', nextLabel:'Klaar →', prev:'todo',  prevLabel:'← Te doen'},
+    {id:'done',  label:'Klaar',   accent:'var(--green-border)',                                   prev:'doing', prevLabel:'← Bezig'},
+  ];
+  return `
+    <div>
+      <div class="perf-page-head">
+        <div>
+          <div class="perf-page-title">Taakoverzicht</div>
+          <div class="perf-page-sub">Bijhouden van lopende en afgeronde taken</div>
+        </div>
+        <button class="perf-btn perf-btn-primary" onclick="addBoardCard()">+ Nieuwe taak</button>
+      </div>
+      <div class="kanban-board">
+        ${COLS.map(col=>{
+          const cards=perfData.board[col.id]||[];
+          return `
+          <div class="kanban-col">
+            <div class="kanban-col-header" style="border-top:2px solid ${col.accent};">
+              <span class="kanban-col-title">${col.label}</span>
+              <span class="kanban-count">${cards.length}</span>
+            </div>
+            <div class="kanban-cards">
+              ${cards.length ? cards.map(c=>`
+                <div class="kanban-card">
+                  <div class="kanban-card-title">${escHtml(c.title)}</div>
+                  ${c.assignee?`<div class="kanban-card-assignee">👤 ${escHtml(c.assignee)}</div>`:''}
+                  <div class="kanban-card-actions">
+                    ${col.prev?`<button class="kanban-mv-btn" onclick="moveBoardCard('${c.id}','${col.id}','${col.prev}')">${col.prevLabel}</button>`:''}
+                    ${col.next?`<button class="kanban-mv-btn" onclick="moveBoardCard('${c.id}','${col.id}','${col.next}')">${col.nextLabel}</button>`:''}
+                    <button class="kanban-del-btn" onclick="deleteBoardCard('${c.id}','${col.id}')" title="Verwijderen">✕</button>
+                  </div>
+                </div>`).join('')
+              : '<div class="kanban-empty">Geen taken</div>'}
+            </div>
+          </div>`;}).join('')}
+      </div>
+    </div>`;
+}
+
+function perfNotesHTML(){
+  return `
+    <div>
+      <div class="perf-page-head">
+        <div>
+          <div class="perf-page-title">Notities</div>
+          <div class="perf-page-sub">Snelle aantekeningen — dubbelklik op een notitie om te bewerken</div>
+        </div>
+        <button class="perf-btn perf-btn-primary" onclick="addNote()">+ Nieuwe notitie</button>
+      </div>
+      <div class="notes-grid">
+        ${perfData.notes.length ? [...perfData.notes].reverse().map(n=>{
+          const bg=NOTE_BG[n.colorIdx%NOTE_BG.length],tc=NOTE_TC[n.colorIdx%NOTE_TC.length],bd=NOTE_BD[n.colorIdx%NOTE_BD.length];
+          return `
+          <div class="note-card" style="background:${bg};border-color:${bd};" ondblclick="editNote('${n.id}')" title="Dubbelklik om te bewerken">
+            <div class="note-text" style="color:${tc};">${escHtml(n.text).replace(/\n/g,'<br>')}</div>
+            <div class="note-footer">
+              <span style="color:${tc};opacity:0.4;font-size:9px;font-family:'Geist Mono',monospace;">${fmtDate(n.createdAt)}</span>
+              <button class="note-del" onclick="event.stopPropagation();deleteNote('${n.id}')" style="color:${tc};">✕</button>
+            </div>
+          </div>`;}).join('')
+        : '<div class="perf-empty" style="grid-column:1/-1;padding:56px 0;">Nog geen notities — klik op "+ Nieuwe notitie"</div>'}
+      </div>
+    </div>`;
 }
 
 // ── TICKETS ───────────────────────────────────────────────────────────────
 function addTicket(){
-  const title = document.getElementById('ticketTitle').value.trim();
-  if(!title){ document.getElementById('ticketTitle').focus(); showHint('Voer een omschrijving in'); return; }
-  const h = parseInt(document.getElementById('ticketHours').value)||0;
-  const m = parseInt(document.getElementById('ticketMins').value)||0;
-  const status = document.getElementById('ticketStatus').value;
-  perfData.tickets.unshift({ id:perfId(), title, responseMin:h*60+m, status, date:new Date().toISOString() });
-  savePerfData();
-  document.getElementById('ticketTitle').value='';
-  document.getElementById('ticketHours').value='';
-  document.getElementById('ticketMins').value='';
-  renderPerfView();
-  showHint('Ticket toegevoegd');
+  const el=document.getElementById('ticketTitle'); if(!el) return;
+  const title=el.value.trim();
+  if(!title){ el.focus(); showHint('Voer een omschrijving in'); return; }
+  const h=parseInt(document.getElementById('ticketHours').value)||0;
+  const m=parseInt(document.getElementById('ticketMins').value)||0;
+  const status=document.getElementById('ticketStatus').value;
+  perfData.tickets.unshift({id:perfId(),title,responseMin:h*60+m,status,date:new Date().toISOString()});
+  savePerfData(); switchPerfSection('tickets'); showHint('Ticket toegevoegd ✓');
 }
 
 function deleteTicket(id){
-  perfData.tickets = perfData.tickets.filter(t=>t.id!==id);
-  savePerfData(); renderPerfView();
+  perfData.tickets=perfData.tickets.filter(t=>t.id!==id);
+  savePerfData(); switchPerfSection('tickets');
 }
 
 function toggleTicketStatus(id){
-  const t = perfData.tickets.find(t=>t.id===id);
-  if(t){ t.status = t.status==='open'?'closed':'open'; savePerfData(); renderPerfView(); }
+  const t=perfData.tickets.find(t=>t.id===id);
+  if(t){ t.status=t.status==='open'?'closed':'open'; savePerfData(); switchPerfSection('tickets'); }
 }
 
 // ── PRODUCTS ──────────────────────────────────────────────────────────────
 function addProduct(){
-  const name = document.getElementById('productName').value.trim();
-  if(!name){ document.getElementById('productName').focus(); showHint('Voer een productnaam in'); return; }
-  const dateVal = document.getElementById('productDate').value;
-  perfData.products.unshift({ id:perfId(), name, date: dateVal ? new Date(dateVal).toISOString() : new Date().toISOString() });
-  savePerfData();
-  document.getElementById('productName').value='';
-  renderPerfView();
-  showHint('Product toegevoegd');
+  const el=document.getElementById('productName'); if(!el) return;
+  const name=el.value.trim();
+  if(!name){ el.focus(); showHint('Voer een productnaam in'); return; }
+  const dateVal=document.getElementById('productDate').value;
+  perfData.products.unshift({id:perfId(),name,date:dateVal?new Date(dateVal).toISOString():new Date().toISOString()});
+  savePerfData(); switchPerfSection('products'); showHint('Product toegevoegd ✓');
 }
 
 function deleteProduct(id){
-  perfData.products = perfData.products.filter(p=>p.id!==id);
-  savePerfData(); renderPerfView();
+  perfData.products=perfData.products.filter(p=>p.id!==id);
+  savePerfData(); switchPerfSection('products');
 }
 
 function productsLast30(){
-  const cutoff = Date.now()-30*24*60*60*1000;
+  const cutoff=Date.now()-30*24*60*60*1000;
   return perfData.products.filter(p=>new Date(p.date).getTime()>cutoff);
 }
 
 // ── NOTES ─────────────────────────────────────────────────────────────────
-const NOTE_BG   = ['#2e1d04','#052914','#052920','#2a0520','#0d1e45','#280505'];
-const NOTE_TC   = ['#fcd896','#86efac','#5ee8d4','#f9a8d4','#a8c4ff','#fca5a5'];
-const NOTE_BD   = ['#5a3a08','#0a4a20','#0d5045','#5a0a38','#1e3a7a','#5a0808'];
+const NOTE_BG=['#2e1d04','#052914','#052920','#2a0520','#0d1e45','#280505'];
+const NOTE_TC=['#fcd896','#86efac','#5ee8d4','#f9a8d4','#a8c4ff','#fca5a5'];
+const NOTE_BD=['#5a3a08','#0a4a20','#0d5045','#5a0a38','#1e3a7a','#5a0808'];
 
 function addNote(){
-  const text = prompt('Notitie tekst:','');
+  const text=prompt('Notitie tekst:','');
   if(!text||!text.trim()) return;
-  const idx = perfData.notes.length % NOTE_BG.length;
-  perfData.notes.push({ id:perfId(), text:text.trim(), colorIdx:idx, createdAt:new Date().toISOString() });
-  savePerfData(); renderPerfView();
+  const idx=perfData.notes.length%NOTE_BG.length;
+  perfData.notes.push({id:perfId(),text:text.trim(),colorIdx:idx,createdAt:new Date().toISOString()});
+  savePerfData(); switchPerfSection('notes');
 }
 
 function deleteNote(id){
-  perfData.notes = perfData.notes.filter(n=>n.id!==id);
-  savePerfData(); renderPerfView();
+  perfData.notes=perfData.notes.filter(n=>n.id!==id);
+  savePerfData(); switchPerfSection('notes');
 }
 
 function editNote(id){
-  const note = perfData.notes.find(n=>n.id===id);
-  if(!note) return;
-  const text = prompt('Notitie bewerken:', note.text);
+  const note=perfData.notes.find(n=>n.id===id); if(!note) return;
+  const text=prompt('Notitie bewerken:',note.text);
   if(text===null||text===undefined) return;
-  if(text.trim()) note.text = text.trim();
-  savePerfData(); renderPerfView();
+  if(text.trim()) note.text=text.trim();
+  savePerfData(); switchPerfSection('notes');
 }
 
 // ── KANBAN ────────────────────────────────────────────────────────────────
 function addBoardCard(){
-  const title = prompt('Nieuwe taak omschrijving:','');
-  if(!title||!title.trim()) return;
-  const assignee = prompt('Toegewezen aan (leeg = niemand):','') || '';
-  perfData.board.todo.push({ id:perfId(), title:title.trim(), assignee:assignee.trim() });
-  savePerfData(); renderPerfView();
+  const title=prompt('Nieuwe taak:',''); if(!title||!title.trim()) return;
+  const assignee=prompt('Toegewezen aan (optioneel):','')||'';
+  perfData.board.todo.push({id:perfId(),title:title.trim(),assignee:assignee.trim()});
+  savePerfData(); switchPerfSection('board');
 }
 
-function moveBoardCard(id, fromCol, toCol){
-  const cards = perfData.board[fromCol]||[];
-  const card = cards.find(c=>c.id===id);
-  if(!card) return;
-  perfData.board[fromCol] = cards.filter(c=>c.id!==id);
+function moveBoardCard(id,fromCol,toCol){
+  const cards=perfData.board[fromCol]||[];
+  const card=cards.find(c=>c.id===id); if(!card) return;
+  perfData.board[fromCol]=cards.filter(c=>c.id!==id);
   if(!perfData.board[toCol]) perfData.board[toCol]=[];
   perfData.board[toCol].push(card);
-  savePerfData(); renderPerfView();
+  savePerfData(); switchPerfSection('board');
 }
 
-function deleteBoardCard(id, col){
-  perfData.board[col] = (perfData.board[col]||[]).filter(c=>c.id!==id);
-  savePerfData(); renderPerfView();
-}
-
-// ── RENDER PERF VIEW ──────────────────────────────────────────────────────
-function renderPerfStats(){
-  // KPI cards
-  const allFlows = Object.values(flows);
-  const closedT  = perfData.tickets.filter(t=>t.status==='closed');
-  const openT    = perfData.tickets.filter(t=>t.status==='open');
-  const avgMin   = closedT.length ? Math.round(closedT.reduce((s,t)=>s+t.responseMin,0)/closedT.length) : null;
-  const avgStr   = avgMin===null ? '—' : fmtResponse(avgMin);
-  const prod30   = productsLast30().length;
-  const doneCards= (perfData.board.done||[]).length;
-
-  const cards = [
-    { label:'Gem. response tijd', value:avgStr,         icon:'⏱', color:'var(--acc)',   sub:closedT.length+' gesloten ticket'+(closedT.length!==1?'s':'') },
-    { label:'Producten (30 dgn)', value:prod30,          icon:'📦', color:'var(--green)', sub:perfData.products.length+' totaal gepusht' },
-    { label:'Open tickets',       value:openT.length,    icon:'🎫', color:'var(--amber)', sub:'wachten op actie' },
-    { label:'Taken klaar',        value:doneCards,        icon:'✅', color:'var(--teal)',  sub:'van het taakoverzicht' },
-  ];
-  document.getElementById('perfStats').innerHTML = cards.map(c=>`
-    <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r-lg);padding:18px 16px;">
-      <div style="font-size:18px;margin-bottom:10px;">${c.icon}</div>
-      <div style="font-size:26px;font-weight:700;color:${c.color};letter-spacing:-1px;">${c.value}</div>
-      <div style="font-size:11px;color:var(--t1);margin-top:4px;font-weight:500;">${c.label}</div>
-      <div style="font-size:10px;color:var(--t3);margin-top:2px;">${c.sub}</div>
-    </div>`).join('');
-}
-
-function renderTicketList(){
-  const el=document.getElementById('ticketList'); if(!el) return;
-  if(!perfData.tickets.length){ el.innerHTML='<div class="perf-empty">Nog geen tickets — voeg er een toe ↑</div>'; return; }
-  el.innerHTML = perfData.tickets.slice(0,30).map(t=>`
-    <div class="perf-row">
-      <div style="flex:1;min-width:0;">
-        <div class="perf-row-title">${escHtml(t.title)}</div>
-        <div class="perf-row-meta">${fmtDate(t.date)}${t.responseMin?' · '+fmtResponse(t.responseMin):''}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-        <span class="perf-badge ${t.status==='open'?'badge-open':'badge-closed'}" onclick="toggleTicketStatus('${t.id}')" style="cursor:pointer;" title="Klik om status te wisselen">${t.status==='open'?'Open':'Klaar'}</span>
-        <button class="perf-row-del" onclick="deleteTicket('${t.id}')" title="Verwijderen">✕</button>
-      </div>
-    </div>`).join('');
-}
-
-function renderProductList(){
-  const el=document.getElementById('productList'); if(!el) return;
-  if(!perfData.products.length){ el.innerHTML='<div class="perf-empty">Nog geen producten — voeg er een toe ↑</div>'; return; }
-  const cutoff = Date.now()-30*24*60*60*1000;
-  el.innerHTML = perfData.products.slice(0,30).map(p=>{
-    const rec = new Date(p.date).getTime()>cutoff;
-    return `
-    <div class="perf-row">
-      <div style="flex:1;min-width:0;">
-        <div class="perf-row-title">${escHtml(p.name)}</div>
-        <div class="perf-row-meta">${fmtDate(p.date)}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-        <span class="perf-badge ${rec?'badge-recent':'badge-old'}">${rec?'30d':'Ouder'}</span>
-        <button class="perf-row-del" onclick="deleteProduct('${p.id}')" title="Verwijderen">✕</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function renderNotesList(){
-  const el=document.getElementById('notesList'); if(!el) return;
-  if(!perfData.notes.length){ el.innerHTML='<div class="perf-empty" style="grid-column:1/-1;">Nog geen notities — klik op "+ Notitie"</div>'; return; }
-  el.innerHTML = [...perfData.notes].reverse().map(n=>{
-    const bg=NOTE_BG[n.colorIdx%NOTE_BG.length], tc=NOTE_TC[n.colorIdx%NOTE_TC.length], bd=NOTE_BD[n.colorIdx%NOTE_BD.length];
-    return `
-    <div class="note-card" style="background:${bg};border-color:${bd};" ondblclick="editNote('${n.id}')" title="Dubbelklik om te bewerken">
-      <div class="note-text" style="color:${tc};">${escHtml(n.text).replace(/\n/g,'<br>')}</div>
-      <div class="note-footer">
-        <span style="color:${tc};opacity:0.5;font-size:9px;font-family:'Geist Mono',monospace;">${fmtDate(n.createdAt)}</span>
-        <button class="note-del" onclick="event.stopPropagation();deleteNote('${n.id}')" style="color:${tc};">✕</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function renderKanban(){
-  const el=document.getElementById('kanbanBoard'); if(!el) return;
-  const COLS = [
-    { id:'todo',  label:'📋 Te doen', topColor:'var(--b3)',           next:'doing', nextLabel:'Bezig →' },
-    { id:'doing', label:'⚡ Bezig',   topColor:'var(--amber-border)',  next:'done',  nextLabel:'Klaar →', prev:'todo',  prevLabel:'← Te doen' },
-    { id:'done',  label:'✅ Klaar',   topColor:'var(--green-border)',                                     prev:'doing', prevLabel:'← Bezig' },
-  ];
-  el.innerHTML = COLS.map(col=>{
-    const cards = perfData.board[col.id]||[];
-    return `
-    <div class="kanban-col">
-      <div class="kanban-col-header" style="border-top:2px solid ${col.topColor};">
-        <span class="kanban-col-title">${col.label}</span>
-        <span class="kanban-count">${cards.length}</span>
-      </div>
-      <div class="kanban-cards">
-        ${cards.length ? cards.map(c=>`
-          <div class="kanban-card">
-            <div class="kanban-card-title">${escHtml(c.title)}</div>
-            ${c.assignee?`<div class="kanban-card-assignee">👤 ${escHtml(c.assignee)}</div>`:''}
-            <div class="kanban-card-actions">
-              ${col.prev?`<button class="kanban-mv-btn" onclick="moveBoardCard('${c.id}','${col.id}','${col.prev}')">${col.prevLabel}</button>`:''}
-              ${col.next?`<button class="kanban-mv-btn" onclick="moveBoardCard('${c.id}','${col.id}','${col.next}')">${col.nextLabel}</button>`:''}
-              <button class="kanban-del-btn" onclick="deleteBoardCard('${c.id}','${col.id}')" title="Verwijderen">✕</button>
-            </div>
-          </div>`).join('')
-        : `<div class="kanban-empty">Leeg</div>`}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function renderPerfView(){
-  renderPerfStats();
-  renderTicketList();
-  renderProductList();
-  renderNotesList();
-  renderKanban();
+function deleteBoardCard(id,col){
+  perfData.board[col]=(perfData.board[col]||[]).filter(c=>c.id!==id);
+  savePerfData(); switchPerfSection('board');
 }
 
 function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
